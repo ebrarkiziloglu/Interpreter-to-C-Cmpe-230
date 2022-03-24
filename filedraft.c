@@ -7,6 +7,7 @@
 #define MAXDIMENSION 10
 
 float* transposeMatrix(int r, int c, float matrix[r][c]);
+float* transposeSquareMatrix(int r, float matrix[r][r]);
 void printMatrix(float matrix[r][c]);
 float* scalarMultiplication(float x, int r, int c, float matrix[r][c]);
 float* matrixMultiplication(int r, int n, int c, float matrix1[r][n], float matrix2[n][c]);
@@ -19,11 +20,20 @@ int main(){
     return (0);
 }
 
+float* transposeMatrix(int r, int c, float matrix[r][c]){
+    static float tr[MAXDIMENSION][MAXDIMENSION];
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            tr[j][i] = matrix[i][j];
+        }
+    }
+    return tr;
+}
 
 //doesn't create a new matrix, modifies the current one
-float* transposeMatrix(int r, int c, float matrix[r][c]){
+float* transposeSquareMatrix(int r, float matrix[r][r]){
     for(int i = 0; i < r; i++){
-        for(int j = i; j < c; j++){
+        for(int j = i; j < r; j++){
             float temp = matrix[i][j];
             matrix[i][j] = matrix[j][i];
             matrix[j][i] = temp;
