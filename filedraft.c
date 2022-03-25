@@ -8,10 +8,13 @@
 
 float(* transposeMatrix(int r, int c, float matrix[r][c]))[];
 void printMatrix(int r, int c, float (*ptr)[]);
-int isInt(float x);
 float(* scalarMultiplication(float x, int r, int c, float matrix[r][c]))[];
 float (* matrixMultiplication(int r, int n, int c, float matrix1[r][n], float matrix2[n][c]))[];
 float **matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]);
+float scalar_sum(float x, float y);
+float scalar_sub(float x, float y);
+float scalar_multp(float x, float y);
+int isInt(float x);
 
 int main(){
     float c[2][2] = {{1,2}, {3, 4}};
@@ -98,6 +101,18 @@ float (*matrixMultiplication(int r, int n, int c, float matrix1[r][n], float mat
         }
     }
     return ptr;
+}
+
+float scalar_sum(float x, float y){
+    return x+y;
+}
+
+float scalar_sub(float x, float y){
+    return x-y;
+}
+
+float scalar_multp(float x, float y){
+    return x*y;
 }
 
 //mustn't print out float values with .000000
