@@ -21,6 +21,15 @@ int  morefactors(char *) ;
 int  is_integer(char *) ;
 char *separateLine(char line1[], int length, bool nw);
 
+typedef struct ID{
+    char *name;
+    //these dimensions can be 0 for scalars
+    int row;
+    int col;
+};
+
+struct ID IDs[MAXIDS] ;
+
 int main(int argc,char *argv[])
 {
     int numtokens ;
