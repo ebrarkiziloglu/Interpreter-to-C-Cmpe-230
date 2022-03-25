@@ -6,40 +6,59 @@
 
 #define MAXDIMENSION 10
 
-float* transposeMatrix(int r, int c, float matrix[r][c]);
-float* transposeSquareMatrix(int r, float matrix[r][r]);
-void printMatrix(float matrix[r][c]);
-float* scalarMultiplication(float x, int r, int c, float matrix[r][c]);
-float* matrixMultiplication(int r, int n, int c, float matrix1[r][n], float matrix2[n][c]);
+float(* transposeMatrix(int r, int c, float matrix[r][c]))[];
+void printMatrix(int r, int c, float (*ptr)[]);
 int isInt(float x);
+float(* scalarMultiplication(float x, int r, int c, float matrix[r][c]))[];
+float (* matrixMultiplication(int r, int n, int c, float matrix1[r][n], float matrix2[n][c]))[];
+float **matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]);
 
 int main(){
-    float *ptr;
-    ptr = transposeMatrix(2, 2, {{1,2},{3,4}});
-    printMatrix(ptr);
+    float c[2][2] = {{1,2}, {3, 4}};
+    float d[2][2] = {{1,2}, {3, 4}};
+
+    float **k = matrix_sum(2, 2, c, d);
+    printMatrix(2, 2, k);
+
+    float (*pC)[sizeof(c[0])/sizeof(float)] = (&c)[0];
+    float (*pD)[sizeof(d[0])/sizeof(float)] = (&d)[0];
+
+    printMatrix(2, 2, pC);
+    printf("\n");
+
+    printf("c + d = \n");
+    printMatrix(2, 2, matrix_sum(2, 2, c, d));
+
+    printf("\n");
+    printMatrix(2, 2, matrixMultiplication(2, 2, 2, pC, pD));
     return (0);
 }
 
-float* transposeMatrix(int r, int c, float matrix[r][c]){
+float **matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]){
+    int i, j;
+    float **matrix_res;
+    matrix_res = malloc(sizeof(int)*r);
+
+    for(i=0; i<r; i++) {
+        matrix_res[i] = malloc(sizeof(int)*c);
+    }
+    for(i = 0; i < r; i++){
+        for(j = 0; j < c; j++){
+            matrix_res[i][j] = matrix1[i][j] + matrix2[i][j];
+        }
+    }
+    return matrix_res;
+}
+
+float(* transposeMatrix(int r, int c, float matrix[r][c]))[]{
     static float tr[MAXDIMENSION][MAXDIMENSION];
+
     for(int i = 0; i < r; i++){
         for(int j = 0; j < c; j++){
             tr[j][i] = matrix[i][j];
         }
     }
     return tr;
-}
-
-//doesn't create a new matrix, modifies the current one
-float* transposeSquareMatrix(int r, float matrix[r][r]){
-    for(int i = 0; i < r; i++){
-        for(int j = i; j < r; j++){
-            float temp = matrix[i][j];
-            matrix[i][j] = matrix[j][i];
-            matrix[j][i] = temp;
-        }
-    }
-    return matrix;
 }
 
 void printMatrix(int r, int c, float matrix[r][c]){
@@ -56,7 +75,7 @@ void printMatrix(int r, int c, float matrix[r][c]){
     }
 }
 
-float* scalarMultiplication(float x, int r, int c, float matrix[r][c]){
+float(* scalarMultiplication(float x, int r, int c, float matrix[r][c]))[]{
     for(int i=0; i<r; i++) {
         for(int j=0; j<c; j++){
             matrix[i][j] *= x;
@@ -66,19 +85,19 @@ float* scalarMultiplication(float x, int r, int c, float matrix[r][c]){
 }
 
 //PROBLEM while printing the res
-//printing the whole 10x10 matrix works fine but with smaller values, prints 0
-float* matrixMultiplication(int r, int n, int c, float matrix1[r][n], float matrix2[n][c]){
+float (*matrixMultiplication(int r, int n, int c, float matrix1[r][n], float matrix2[n][c]))[]{
     static float res[MAXDIMENSION][MAXDIMENSION];
+    float (*ptr)[] = res;
     for(int i=0; i<r; i++){
         for(int j=0; j<c; j++){
             float temp=0;
             for(int k=0; k<n; k++){
                 temp += matrix1[i][k] * matrix2[k][j];
-                res[i][j] = temp;
             }
+            res[i][j] = temp;
         }
     }
-    return res;
+    return ptr;
 }
 
 //mustn't print out float values with .000000
