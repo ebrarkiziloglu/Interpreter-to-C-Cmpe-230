@@ -10,7 +10,7 @@ float(* transposeMatrix(int r, int c, float matrix[r][c]))[];
 void printMatrix(int r, int c, float (*ptr)[]);
 float(* scalarMultiplication(float x, int r, int c, float matrix[r][c]))[];
 float (* matrixMultiplication(int r, int n, int c, float matrix1[r][n], float matrix2[n][c]))[];
-float **matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]);
+float (*matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]))[];
 float scalar_sum(float x, float y);
 float scalar_sub(float x, float y);
 float scalar_multp(float x, float y);
@@ -37,14 +37,10 @@ int main(){
     return (0);
 }
 
-float **matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]){
+float (*matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]))[]{
     int i, j;
-    float **matrix_res;
-    matrix_res = malloc(sizeof(int)*r);
-
-    for(i=0; i<r; i++) {
-        matrix_res[i] = malloc(sizeof(int)*c);
-    }
+    static float matrix_res[MAXDIMENSION][MAXDIMENSION];
+    
     for(i = 0; i < r; i++){
         for(j = 0; j < c; j++){
             matrix_res[i][j] = matrix1[i][j] + matrix2[i][j];
