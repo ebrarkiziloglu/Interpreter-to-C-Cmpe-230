@@ -7,8 +7,8 @@
 #define MAXDIMENSION 10
 
 float(* transposeMatrix(int r, int c, float matrix[r][c]))[];
-float (*matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]))[];
-void printMatrix(int r, int c, float (*ptr)[]);
+float (*matrix_sum(int r, int c, float matrix1[r][c], int row, int column, float matrix2[row][column]))[];
+void printMatrix(int row, int column, int r, int c, float (*ptr)[]);
 float scalar_sum(float x, float y);
 float scalar_sub(float x, float y);
 float scalar_multp(float x, float y);
@@ -20,7 +20,7 @@ int main(){
     float a[3][3] = {{0,1,2}, {3,4,5}, {6,7,8}};
     float b[3][3] = {{10,11,12}, {13,14,15}, {16,17,18}};
     printf("a is:\n");
-    printMatrix(3, 3, a);
+    printMatrix(3, 3, 3, 3, a);
 //    printf("\n\n");
 //    printf("b is:\n");
 //    printMatrix(3, 3, b);
@@ -28,9 +28,10 @@ int main(){
 //    printMatrix(4, 3, transposeMatrix(3, 4, a));
     float (*c)[]= transposeMatrix(3, 3, b);
     printf("\n\ntranspose is:\n");
-    printMatrix(3, 3, c);
+    printMatrix(3, 3, MAXDIMENSION, MAXDIMENSION, c);
     printf("\n\nsum is:\n");
-    printMatrix(3,3, matrix_sum(3,3,a, c));
+    float (*d)[] = matrix_sum(3,3,a, MAXDIMENSION, MAXDIMENSION, c);
+    printMatrix(3,3, MAXDIMENSION, MAXDIMENSION, d);
     return 0;
 }
 
@@ -48,9 +49,9 @@ float scalar_multp(float x, float y){
     return x*y;
 }
 
-float (*matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]))[]{
+float (*matrix_sum(int r, int c, float matrix1[r][c], int row, int column, float matrix2[row][column]))[]{
     int i, j;
-    float matrix_res[r][c];
+    static float matrix_res[MAXDIMENSION][MAXDIMENSION];
 
     for(i = 0; i < r; i++){
         for(j = 0; j < c; j++){
@@ -61,7 +62,7 @@ float (*matrix_sum(int r, int c, float matrix1[r][c], float matrix2[r][c]))[]{
 }
 
 float(* transposeMatrix(int r, int c, float matrix[r][c]))[]{
-    float tr[c][r];
+    static float tr[MAXDIMENSION][MAXDIMENSION];
 
     for(int i = 0; i < r; i++){
         for(int j = 0; j < c; j++){
@@ -72,10 +73,10 @@ float(* transposeMatrix(int r, int c, float matrix[r][c]))[]{
 }
 
 
-void printMatrix(int r, int c, float matrix[r][c]){
+void printMatrix(int row, int column, int r, int c, float matrix[r][c]){
     float temp;
-    for(int i=0; i<r; i++){
-        for(int j=0; j<c; j++){
+    for(int i=0; i<row; i++){
+        for(int j=0; j<column; j++){
             temp = matrix[i][j];
             if(isInt(temp)==1)
                 printf("%d ", (int)temp);
