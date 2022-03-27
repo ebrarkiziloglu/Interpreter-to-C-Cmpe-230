@@ -8,7 +8,7 @@
 2. During definitions, create struct and add id names into 'IDs'.
 3. Read assingments, first token: id, second token: =, rest is: <expr>\
 4. Functions in the file.c:\
-&nbsp;&nbsp;&nbsp;** ~~Scalar addition\
+&nbsp;&nbsp;&nbsp;~~** Scalar addition\
 &nbsp;&nbsp;&nbsp;** Scalar multiplication\
 &nbsp;&nbsp;&nbsp;** Scalar substraction~~\
 &nbsp;&nbsp;&nbsp;** Vector addition\
