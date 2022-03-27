@@ -1,5 +1,5 @@
 
-//// TO-DOs
+//// TO-DOs:
 -factor fonksiyonunda id lerden sonra, 'str' ye type ekleyecegiz.
 
 // Comment
