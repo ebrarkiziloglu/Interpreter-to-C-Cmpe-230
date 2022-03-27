@@ -38,5 +38,5 @@
 
 
 
-
+//// inside sqrt, no negative numbers!!
 //// PRINT and FOR
