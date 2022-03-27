@@ -398,4 +398,11 @@ char *separateLine(char line[], int length, bool nw){
     return result;
 }
 
+int isID(char *s){
+    for(int i=0; i<sizeof(IDs)/sizeof(IDs[0]); i++){
+        if(strcmp(s, IDs[i].name)==0)
+            return i;
+    }
+    return -1;
+}
 
