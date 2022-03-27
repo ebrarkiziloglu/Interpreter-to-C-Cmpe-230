@@ -10,12 +10,22 @@
 #define MAXIDS 10
 
 char tokens[MAXTOKENS][TOKENLENGTH] ;
+int cur = 0 ;
+int numtokens;
 char result[N] = "";
 char str[N] ;
-int  cur = 0 ;
+char stacktokens[MAXTOKENS][TOKENLENGTH] ;
+int stackcur = 0;
+int numstacktokens = 0;
 int currentRow = 0;
 int currentColumn = 0;
 
+bool isfactorscalar = false;
+bool isprevfactorscalar = false;
+bool istermscalar = false;
+bool isprevtermscalar = false;
+
+char *processStack(char str[N]);
 int  expr(char *) ;
 int  term(char *) ;
 int  moreterms(char *) ;
@@ -40,38 +50,37 @@ struct ID IDs[MAXIDS] ;
 int maxDimension = 0;
 
 int main (int argc,char *argv[]) {
+    struct ID x = {"x", 0,0};
+    struct ID i = {"i", 0,0};
+    struct ID j = {"j", 0,0};
+    struct ID A = {"A", 2, 2};
+    struct ID B = {"B", 2, 2};
+    struct ID y = {"y", 2, 1};
+    struct ID xy2 = {"xy2", 4, 1};
+    IDs[0] = x;
+    IDs[1] = i;
+    IDs[2] = j;
+    IDs[3] = A;
+    IDs[4] = B;
+    IDs[5] = y;
+    IDs[6] = xy2;
 
-//    struct ID x = {"x", 0,0};
-//    struct ID i = {"i", 0,0};
-//    struct ID A = {"A", 2, 2};
-//    IDs[0] = x;
-//    IDs[1] = A;
-//    IDs[2] = i;
-
-    int numtokens ;
-    // read the tokens
-    numtokens = 0 ;
-    char result[1000];
     strcpy(result, "");
     char *q;
     char *token ;
     FILE *fp;
-    FILE *wp;
-    char buff[80];
+    char buff[256];
     const char* line;
     /* Open file for reading Filename is given on the command line */
      if (argc != 2) {
          printf("Give filename as command line argument\n") ;
-        return(1);
+         return(1);
      }
     fp = fopen(argv[1], "r");
-    // wp = fopen(argv[2], "w");
-
     if(fp == NULL) {
         printf("Cannot open %s\n",argv[1]);
         return(1);
     }
-
     while( strcmp(fgets(buff,256,fp), "\n")) {
         q = separateLine(buff, strlen(buff), false) ;
         line = defineVariable(q);
@@ -80,10 +89,9 @@ int main (int argc,char *argv[]) {
     }
     // printf("Definition result is:\n%s\n", result);
     // printf("maxDimension: %d\n", maxDimension);
-    strcat(result, "\n########\n");
+    strcat(result, "########\n");
     while( fgets(buff,256,fp) != NULL ) {
         q = separateLine(buff, strlen(buff), false) ;
-        // printf("76 - %s\n", q);
         numtokens = 0;
         memset(tokens, 0, sizeof(tokens[0][0]) * strlen(tokens[0]) * TOKENLENGTH);
         cur = 0;
@@ -93,7 +101,6 @@ int main (int argc,char *argv[]) {
                 if( token == NULL)
                     break;
             }
-            // tokens[numtokens] = *token;
             if(token != NULL){
                 if((strcmp(token, "#") == 0)){
                     break;
@@ -103,19 +110,56 @@ int main (int argc,char *argv[]) {
             }
             else break;
         }
-        sprintf(tokens[numtokens],"$") ;
-        numtokens++ ;
-        // parse the expression
-        char str[N] = "";
-        expr(str);
-        strcat(result, str);
-        printf("99 - str:%s\n", str);
-        strcat(result, "\n");
+        if(numtokens != 0){
+            sprintf(tokens[numtokens],"$") ;
+            numtokens++ ;
+            // parse the expression
+            char str[N] = "";
+            expr(str);
+            printf("%s\n", str);
+            // processStack(str);
+            strcat(result, str);
+            strcat(result, "\n");
+        }
     }
-    printf("Result is:\n%s\n", result);
+    //printf("\nResult is:\n\n%s\n", result);
+
+//    FILE *wp;
+//    wp = fopen(argv[2], "w");
     return(0);
 }
 
+char *processStack(char str[N]){
+    char *p;
+    char *stacktoken;
+    char *token;
+    p = separateLine(str, strlen(str), false);
+    numtokens = 0;
+    memset(tokens, 0, sizeof(tokens[0][0]) * strlen(tokens[0]) * TOKENLENGTH);
+    numstacktokens = 0;
+    memset(stacktokens, 0, sizeof(stacktokens[0][0]) * strlen(stacktokens[0]) * TOKENLENGTH);
+    stackcur = 0;
+    while( (token = strsep(&p," ")) != NULL ){
+        while( (strcmp(token, " ") == 0) || (strcmp(token, "") == 0) || (strcmp(token, "\n") == 0)) {
+            token = strsep(&p," ");
+            if( token == NULL)
+                break;
+        }
+        if(token != NULL){
+            strcpy(tokens[numtokens], token);
+            numtokens++;
+        }
+        else break;
+    }
+    numstacktokens = numtokens;
+    printf("process:\n");
+    for(int i = 0; i < numtokens; i++){
+        strcpy(stacktokens[i], tokens[numtokens - i - 1]);
+        // printf("%d - %s\n", i, stacktokens[i]);
+    }
+    printf("\n\n");
+    return NULL;
+}
 
 char *separateLine(char line[], int length, bool nw){
     if(strcat(line, "\n") == 0) return NULL;
@@ -298,9 +342,12 @@ int term(char *str)
         return(0) ;
     }
     if(morefactorvalue == 1 || morefactorvalue == 2){
+        if(factorvalue == 2) istermscalar = true;
+        if(factorvalue == 3) istermscalar = false;
         result = factorvalue;
     }
     if(morefactorvalue == 3){
+        istermscalar = false;
         result = morefactorvalue;
     }
     strcat(str1,str2) ;
@@ -313,12 +360,27 @@ int moreterms(char *str)
     char str1[N], str2[N], str3[N] ;
     int result = 1;
     str1[0] = str2[0] = str3[0] = '\0' ;
+    char func[N] ;
+    func[0] = '\0' ;
     //printf("291 - curr:%d\n", cur);
     if ( (strcmp(tokens[cur],"+") == 0 ) || (strcmp(tokens[cur],"-") == 0 ) ) {
-        strcpy(str1,tokens[cur]) ;
-        strcat(str1," ") ;
+        isprevtermscalar = istermscalar;
+        strcpy(func,tokens[cur]) ;
+        strcat(func, " ");
         cur++ ;
         int termvalue =  term(str2);
+        if(isprevtermscalar && istermscalar){
+            strcpy(str1, " scalar") ;
+            strcat(str1, func);
+            strcat(str1, " ");
+        } else if(!isprevfactorscalar && !isfactorscalar){
+            strcpy(str1, " matrix") ;
+            strcat(str1, func);
+            strcat(str1, " ");
+        } else{
+            printf("incompatible types\n");
+        }
+        isprevtermscalar = istermscalar;
         int moretermvalue = moreterms(str3);
         if (termvalue == 0 || moretermvalue == 0) {
             return(0) ;
@@ -354,6 +416,7 @@ int factor(char *str)
         strcat(str," ") ;
         cur++ ;
         // scalar:
+        isfactorscalar = true;
         return(2) ;
     }
     // (expr) :
@@ -369,6 +432,8 @@ int factor(char *str)
         }
         cur++ ;
         strcpy(str,str1) ;
+        if(exprvalue == 2) isfactorscalar = true;
+        if(exprvalue == 3) isfactorscalar = false;
         return(exprvalue) ;
     }
     //// From this point on, I added the parts for 'tr', 'choose' and 'sqrt'
@@ -394,9 +459,11 @@ int factor(char *str)
         cur++;
         //// For now, I added the tokens in infix order for these functions, could be changed later.
         strcat(str, str1);
-        // strcat(str, " ");
+        strcat(str, " ");
         strcat(str, func);
         strcat(str, " ");
+        if(exprvalue == 2) isfactorscalar = true;
+        if(exprvalue == 3) isfactorscalar = false;
         return (exprvalue);
     }
     if( strcmp(tokens[cur],"sqrt") == 0 ){
@@ -423,6 +490,7 @@ int factor(char *str)
         // strcat(str, " ");
         strcat(str, func);
         strcat(str, " ");
+        if(exprvalue == 2) isfactorscalar = true;
         return (exprvalue);
     }
     if( strcmp(tokens[cur],"choose") == 0 ){
@@ -483,6 +551,7 @@ int factor(char *str)
         strcat(str, " ");
         strcat(str, str4);
         strcat(str, "choose ");
+        isfactorscalar = true;
         return (2);
     }
     //// if the current token is an id......
@@ -497,6 +566,7 @@ int factor(char *str)
         //variable is a scalar
         strcat(str, tokens[cur]);
         cur++;
+        isfactorscalar = true;
         return 2;
 
     }else if(IDs[check].col == 1){
@@ -505,6 +575,7 @@ int factor(char *str)
         cur++;
         if(strcmp(tokens[cur], "[") != 0) {
             strcat(str, " ");
+            isfactorscalar = false;
             return 3;
 //            printf("ERROR expected expression");
 //            return 0;
@@ -524,6 +595,7 @@ int factor(char *str)
         strcat(str, str1);
         strcat(str, " [] ");
         //// Should we add [0] as well??
+        isfactorscalar = true;
         return 2;
 
     }else{
@@ -535,6 +607,7 @@ int factor(char *str)
 
         if(strcmp(tokens[cur],"[")!=0){
             strcat(str, " ");
+            isfactorscalar = false;
             return 3;
 //            printf("error!, need [");
 //            return 0;
@@ -553,6 +626,7 @@ int factor(char *str)
             }
             strcat(str, str1);
             strcat(str, " [] ");
+            isfactorscalar = false;
             return 3;
         }
         cur++;
@@ -570,6 +644,7 @@ int factor(char *str)
         strcat(str, " [] ");
         strcat(str, str2);
         strcat(str, " [] ");
+        isfactorscalar = true;
         return 2;
     }
     printf("Error: expecting factor\n") ;
@@ -583,12 +658,22 @@ int morefactors(char *str)
     int result = 1;
     str1[0] = str2[0] = str3[0] = '\0' ;
     if ( (strcmp(tokens[cur],"*") == 0 ) /*|| (strcmp(tokens[cur],"/") == 0 )*/ ) {
-        strcpy(str1,tokens[cur]) ;
-        strcat(str1," ") ;
+        isprevfactorscalar = isfactorscalar;
+//        strcpy(str1,tokens[cur]) ;
+//        strcat(str1," ") ;
         cur++ ;
         int factorvalue = factor(str2);
+        if(isprevfactorscalar && isfactorscalar){
+            strcpy(str1, " scalar* ") ;
+        } else if(isprevfactorscalar && !isfactorscalar){
+            strcpy(str1, " scalarmatrix* ") ;
+        } else if(!isprevfactorscalar && isfactorscalar){
+            strcpy(str1, " matrixscalar* ") ;
+        } else if(!isprevfactorscalar && !isfactorscalar){
+            strcpy(str1, " matrix* ") ;
+        }
+        isprevfactorscalar = isfactorscalar;
         int morefactorvalue = morefactors(str3);
-
         if (factorvalue == 0 || morefactorvalue == 0) {
             result = 0;
         }
