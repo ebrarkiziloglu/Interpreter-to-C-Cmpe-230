@@ -261,9 +261,84 @@ int factor(char *str)
 
     //// if the current token is an id......
 
+    //// if the current token is an id......
+    //the parts for ( id | id[expr] | id[expr, expr] ) are left
+
+    // adding to the str as <id>exp[]exp[] or <id>exp[] if vector
+    int check = isID(tokens[cur]);
+    if(check==-1){
+        printf("ERROR: undefined id");
+        return 0;
+
+    }else if(IDs[check].col == 0){
+        //variable is a scalar
+        strcat(str, tokens[cur]);
+        cur++;
+        return 1;
+
+    }else if(IDs[check].col == 1){
+        //variable is a vector
+        strcat(str, tokens[cur]);
+        cur++;
+        if(strcmp(tokens[cur], "[") != 0) {
+            printf("ERROR expected expression");
+            return 0;
+        }
+        cur++;
+        if(!expr(str1)){
+            printf("ERROR expected expression");
+            return 0;
+        }
+
+        if(strcmp(tokens[cur], "]")!=0){
+            printf("Error!! expected ]");
+            return 0;
+        }
+        cur++;
+        strcat(str, str1);
+        strcat(str, " [] ");
+        return 1;
+
+    }else{
+        //variable is a matrix
+        strcat(str, tokens[cur]);
+        cur++;
+        char str2[N];
+        str2[0] = '\0' ;
+
+        if(strcmp(tokens[cur],"[")!=0){
+            printf("error!, need [");
+            return 0;
+        }
+        cur++;
+        if(!expr(str1)){
+            printf("error!, need expr");
+            return 0;
+        }
+        if(strcmp(tokens[cur],",")!=0){
+            printf("error!, need comma");
+            return 0;
+        }
+        cur++;
+        if(!expr(str2)){
+            printf("error!, need expr");
+            return 0;
+        }
+        if(strcmp(tokens[cur],"]")!=0){
+            printf("error!, need ]");
+            return 0;
+        }
+        cur++;
+        strcat(str, str1);
+        strcat(str, " [] ");
+        strcat(str, str2);
+        strcat(str, " [] ");
+    }
+
     printf("Error: expecting factor\n") ;
     return(0) ;
 }
+
 
 
 int morefactors(char *str)
