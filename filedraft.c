@@ -15,6 +15,7 @@ float scalar_sum(float x, float y);
 float scalar_sub(float x, float y);
 float scalar_multp(float x, float y);
 int isInt(float x);
+char *printSep();
 
 int main(){
     float c[2][2] = {{1,2}, {3, 4}};
@@ -118,4 +119,10 @@ int isInt(float x){
     if(check>0)
         return 0;
     return 1;
+}
+
+char *printSep(){
+    char *p;
+    p = "printf(\"----------\\n\");\n";
+    return p;
 }
