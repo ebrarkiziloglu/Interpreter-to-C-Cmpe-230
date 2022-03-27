@@ -37,6 +37,6 @@
 
 
 
-
+//// Hoca said 'You can assume   that   matrices [1,1]   cannot be considered as scalars.' Is this still valid??
 //// inside sqrt, no negative numbers!!
 //// PRINT and FOR
