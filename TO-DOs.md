@@ -4,9 +4,9 @@
 
 // ~~Comment~~
 
-1 - Matrix dimensions in the expr-term-factor loop will be stored. int array or string can be used
-2 - During definitions, create struct and add id names into 'IDs'.
-3 - Functions in the file.c:
+1. Matrix dimensions in the expr-term-factor loop will be stored. int array or string can be used
+2. During definitions, create struct and add id names into 'IDs'.
+3. Functions in the file.c:
   + Scalar addition
   + Scalar multiplication
   + Scalar substraction
