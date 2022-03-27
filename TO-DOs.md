@@ -27,6 +27,9 @@
 &nbsp;&nbsp;&nbsp;** Print vector\
 &nbsp;&nbsp;&nbsp;** Print scalar\
 &nbsp;&nbsp;&nbsp;** Printsep\
+4. Process the postfix string.
+5. Read assingments, first token: id, second token: =, rest is: <expr>\
+  
 
 -- 
 
