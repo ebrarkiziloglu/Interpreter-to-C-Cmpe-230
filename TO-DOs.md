@@ -8,25 +8,25 @@
 2. During definitions, create struct and add id names into 'IDs'.
 3. Functions in the file.c:\
 &nbsp;&nbsp;&nbsp;** Scalar addition
-  ** Scalar multiplication
-  + Scalar substraction
-  - Vector addition
-  - Vector multiplication
-  - Vector substraction
-  - Scalar * Vector
-  - Scalar * Matrix
-  - Matrix addition
-  - Matrix multiplication
-  - Matrix substraction 
-  - transpose of Matrix
-  - transpose of Vector
-  - transpose of Scalar
-  - sqrt of scalar
-  - choose (expr, expr, expr, expr)
-  + Print matrix
-  - Print vector
-  - Print scalar
-  - Printsep
+&nbsp;&nbsp;&nbsp;** Scalar multiplication
+&nbsp;&nbsp;&nbsp;** Scalar substraction
+&nbsp;&nbsp;&nbsp;** Vector addition
+&nbsp;&nbsp;&nbsp;** Vector multiplication
+&nbsp;&nbsp;&nbsp;** Vector substraction
+&nbsp;&nbsp;&nbsp;** Scalar * Vector
+&nbsp;&nbsp;&nbsp;** Scalar * Matrix
+&nbsp;&nbsp;&nbsp;** Matrix addition
+&nbsp;&nbsp;&nbsp;** Matrix multiplication
+&nbsp;&nbsp;&nbsp;** Matrix substraction 
+&nbsp;&nbsp;&nbsp;** transpose of Matrix
+&nbsp;&nbsp;&nbsp;** transpose of Vector
+&nbsp;&nbsp;&nbsp;** transpose of Scalar
+&nbsp;&nbsp;&nbsp;** sqrt of scalar
+&nbsp;&nbsp;&nbsp;** choose (expr, expr, expr, expr)
+&nbsp;&nbsp;&nbsp;** Print matrix
+&nbsp;&nbsp;&nbsp;** Print vector
+&nbsp;&nbsp;&nbsp;** Print scalar
+&nbsp;&nbsp;&nbsp;** Printsep
 
 -- 
 
