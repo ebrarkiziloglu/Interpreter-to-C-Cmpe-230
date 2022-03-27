@@ -59,7 +59,7 @@ int main(int argc,char *argv[])
         q = separateLine(buff, strlen(buff), false) ;
         // printf("51 - q : %s\n", q);
         numtokens = 0;
-        memset(tokens, 0, sizeof(tokens[0][0]) * strlen(tokens) * TOKENLENGTH);
+        memset(tokens, 0, sizeof(tokens[0][0]) * strlen(tokens[0]) * TOKENLENGTH);
         cur = 0;
         while( (token = strsep(&q," ")) != NULL ){
             while( (strcmp(token, " ") == 0) || (strcmp(token, "") == 0) || (strcmp(token, "\n") == 0)) {
