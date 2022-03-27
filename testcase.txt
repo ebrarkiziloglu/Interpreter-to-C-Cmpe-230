@@ -5,9 +5,17 @@ vector y[2]
 matrix A[2,2]
 matrix B[2,2]
 
+3 * 10 + A
+tr(x)*A*xy2
 2* 4 * 50
 sqrt( 4 + tr  ( 4 - 5) * 9 )
 choose (45,x,tr (9) ,70 )
 choose ( i, 6, tr ( 8 ) , 7 ) + choose ( 4, 1, tr ( 9 ) , 0 )
 tr ( 9 + 8 ) * sqrt (0 - 3 )
-3 * 10 + A
+A*B
+B*x
+y[1]
+A*B*y
+# sqrt(tr(y-x)*(y-x))
+A*x
+choose(A[i,j]-4,1,1,0)
