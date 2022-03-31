@@ -13,6 +13,7 @@ char tokens[MAXTOKENS][TOKENLENGTH] ;
 int cur = 0 ;
 int numtokens;
 char result[N] = "";
+char cexpr[N];
 char str[N] ;
 char stacktokens[MAXTOKENS][TOKENLENGTH] ;
 int stackcur = 0;
@@ -25,6 +26,15 @@ bool isprevfactorscalar = false;
 bool istermscalar = false;
 bool isprevtermscalar = false;
 
+int stack[MAXTOKENS];
+int exprneeded[MAXTOKENS];
+int current;
+char index1[10] = "";
+char index2[10] = "";
+int numofindexes;
+bool isexprfinished;
+char string[20] = "";
+
 int  expr(char *) ;
 int  term(char *) ;
 int  moreterms(char *) ;
@@ -36,6 +46,8 @@ const char* defineVariable(char *str);
 int isAlphabetic(char str[]);
 int isNumber(char s[]);
 int isID(char *s);
+char *processStack(char str[N], char *line);
+
 
 struct ID{
     char name[256];
@@ -86,13 +98,13 @@ int main (int argc,char *argv[]) {
         // printf("**:\n%s\n", line);
         strcat(result, line);
     }
-    // printf("Definition result is:\n%s\n", result);
-    // printf("maxDimension: %d\n", maxDimension);
+
     strcat(result, "########\n");
     while( fgets(buff,256,fp) != NULL ) {
         q = separateLine(buff, strlen(buff), false) ;
         numtokens = 0;
         memset(tokens, 0, sizeof(tokens[0][0]) * strlen(tokens[0]) * TOKENLENGTH);
+        cexpr[0] = '\0';
         cur = 0;
         while( (token = strsep(&q," ")) != NULL ){
             while( (strcmp(token, " ") == 0) || (strcmp(token, "") == 0) || (strcmp(token, "\n") == 0)) {
@@ -115,13 +127,12 @@ int main (int argc,char *argv[]) {
             // parse the expression
             char str[N] = "";
             expr(str);
-            printf("%s\n", str);
-            // processStack(str);
-            strcat(result, str);
-            strcat(result, "\n");
+            // printf("%s\n", str);
+            processStack(str, cexpr);
+            strcat(result, cexpr);
         }
     }
-    //printf("\nResult is:\n\n%s\n", result);
+    printf("\nResult is:\n\n%s\n", result);
 
 //    FILE *wp;
 //    wp = fopen(argv[2], "w");
@@ -332,7 +343,6 @@ int moreterms(char *str)
     str1[0] = str2[0] = str3[0] = '\0' ;
     char func[N] ;
     func[0] = '\0' ;
-    //printf("291 - curr:%d\n", cur);
     if ( (strcmp(tokens[cur],"+") == 0 ) || (strcmp(tokens[cur],"-") == 0 ) ) {
         isprevtermscalar = istermscalar;
         strcpy(func,tokens[cur]) ;
@@ -378,8 +388,6 @@ int factor(char *str)
     char str1[N] ;
     int result = 1;
     str1[0] = '\0' ;
-    //printf("325 - curr:%d\n", cur);
-    // printf("141 - %s\n",tokens[cur]) ;
     if ( is_integer(tokens[cur])  ) {
         strcpy(str,tokens[cur]) ;
         strcat(str," ") ;
@@ -702,3 +710,590 @@ int isID(char *s){
     }
     return -1;
 }
+
+
+// scalar* = 1                  // expecting 2 exprs
+// matrix* = 2                  // expecting 2 exprs
+// scalarmatrix* = 3            // expecting 2 exprs
+// matrixscalar* = 4            // expecting 2 exprs
+// scalar+ = 5                  // expecting 2 exprs
+// matrix+ = 6                  // expecting 2 exprs
+// scalar- = 7                  // expecting 2 exprs
+// matrix- = 8                  // expecting 2 exprs
+// sqrt = 9                     // expecting 1 expr
+// choose = 10                  // expecting 4 exprs
+// tr = 11                      // expecting 1 expr
+// number = 12
+// id = 13
+// id[] = 14
+// id[][] = 15
+// [] = 16
+
+
+int push(int type, int needed){
+    if(current > MAXTOKENS - 1) return (-1);
+    stack[current] = type;
+    exprneeded[current] = needed;
+    current++;
+    return (1);
+}
+
+int pop(){
+    if(current == 0 ) return (-1);
+    int temp = stack[current-1];
+    stack[current-1] = 0;
+    exprneeded[current-1] = 0;
+    current--;
+    return (temp);
+}
+
+char *processStack(char str[N], char *line){
+    memset(stack, 0, sizeof(stack));
+    memset(exprneeded, 0, sizeof(exprneeded));
+    current = 0;
+    strcpy(index1, "");
+    strcpy(index2, "");
+    numofindexes = 0;
+    isexprfinished = false;
+    stackcur = 0;
+
+    char *p;
+    char *stacktoken;
+    p = separateLine(str, strlen(str), false);
+    numstacktokens = 0;
+    memset(stacktokens, 0, sizeof(stacktokens[0][0]) * strlen(stacktokens[0]) * TOKENLENGTH);
+    while( (stacktoken = strsep(&p," ")) != NULL ){
+        while( (strcmp(stacktoken, " ") == 0) || (strcmp(stacktoken, "") == 0) || (strcmp(stacktoken, "\n") == 0)) {
+            stacktoken = strsep(&p," ");
+            if( stacktoken == NULL)
+                break;
+        }
+        if(stacktoken != NULL){
+            strcpy(stacktokens[numstacktokens], stacktoken);
+            numstacktokens++;
+        }
+        else break;
+    }
+//    printf("process:\n");
+//    for(int i = 0; i < numstacktokens; i++){
+//        printf("%d - %s\n", i, stacktokens[i]);
+//    }
+    strcpy(line, "");
+    while(stackcur < numstacktokens){
+        int check = isID(stacktokens[stackcur]);
+        if(strcmp(stacktokens[stackcur] , "*") == 0){
+            stackcur++;
+            if(strcmp(stacktokens[stackcur], "scalar") == 0){
+                strcat(line, "scalarmultiply( ");
+                push(1, 2);
+            }
+            if(strcmp(stacktokens[stackcur], "matrix") == 0){
+                strcat(line, "matrixmultiply( ");
+                push(2, 2);
+            }
+            if(strcmp(stacktokens[stackcur], "scalarmatrix") == 0){
+                strcat(line, "scalarmatrixmultiply( ");
+                push(3, 2);
+            }
+            if(strcmp(stacktokens[stackcur], "matrixscalar") == 0){
+                strcat(line, "matrixscalarmultiply( ");
+                push(4, 2);
+            }
+        }
+        else if(strcmp(stacktokens[stackcur] , "+") == 0){
+            stackcur++;
+            if(strcmp(stacktokens[stackcur], "scalar") == 0){
+                strcat(line, "scalarsum( ");
+                push(5, 2);
+            }
+            if(strcmp(stacktokens[stackcur], "matrix") == 0){
+                strcat(line, "matrixsum( ");
+                push(6, 2);
+            }
+        }
+        else if(strcmp(stacktokens[stackcur] , "-") == 0){
+            stackcur++;
+            if(strcmp(stacktokens[stackcur], "scalar") == 0){
+                strcat(line, "scalarsubs( ");
+                push(7, 2);
+            }
+            if(strcmp(stacktokens[stackcur], "matrix") == 0){
+                strcat(line, "matrixsub( ");
+                push(8, 2);
+            }
+        }
+        else if(strcmp(stacktokens[stackcur], "sqrt") == 0){
+            strcat(line, "sqrt( ");
+            push(9, 1);
+        }
+        else if(strcmp(stacktokens[stackcur], "choose") == 0){
+            strcat(line, "choose( ");
+            push(10, 4);
+        }
+        else if(strcmp(stacktokens[stackcur], "tr") == 0){
+            strcat(line, "tr( ");
+            push(11, 1);
+        }
+        else if( is_integer(stacktokens[stackcur])) {       // number
+            int type = stack[current-1];
+            if(type == 1 || type == 5 || type == 7){
+                strcat(line, stacktokens[stackcur]);
+                if(exprneeded[current-1] == 2){
+                    strcat(line, ", ");
+                    exprneeded[current-1] = exprneeded[current-1]-1;
+                    isexprfinished = false;
+                }
+                else if(exprneeded[current-1] == 1){
+                    strcat(line, ") ");
+                    pop();
+                    isexprfinished = true;
+                }
+            }
+            else if(type == 3 ){
+                strcat(line, stacktokens[stackcur]);
+                if(exprneeded[current-1] == 2){
+                    strcat(line, ", ");
+                    exprneeded[current-1] = exprneeded[current-1]-1;
+                    isexprfinished = false;
+                }
+                else if(exprneeded[current-1] == 1){
+                    strcat(line, ") ");
+                    pop();
+                    isexprfinished = true;
+                }
+            }
+            else if(type == 4){
+                strcat(line, stacktokens[stackcur]);
+                if(exprneeded[current-1] == 2){
+                    strcat(line, ", ");
+                    exprneeded[current-1] = exprneeded[current-1]-1;
+                    isexprfinished = false;
+                }
+                else if(exprneeded[current-1] == 1){
+                    strcat(line, ") ");
+                    pop();
+                    isexprfinished = true;
+                }
+            }
+            else if(type == 9 || type == 11){           // sqrt or tr
+                strcat(line, stacktokens[stackcur]);
+                strcat(line, ") ");
+                pop();
+                isexprfinished = true;
+            }
+            else if( type == 10 ){
+                strcat(line, stacktokens[stackcur]);
+                if( exprneeded[current-1] > 1 ){
+                    strcat(line, " , ");
+                    exprneeded[current-1] = exprneeded[current-1] - 1;
+                    isexprfinished = false;
+                } else if( exprneeded[current-1] == 1 ){
+                    strcat(line, ") ");
+                    exprneeded[current-1] = exprneeded[current-1] - 1;
+                    pop();
+                    isexprfinished = true;
+                }
+            }
+            else if( type == 16){
+                if( numofindexes == 0 ){
+                    strcpy(index1, "[");
+                    strcat(index1, stacktokens[stackcur]);
+                    strcat(index1, "]");
+                    numofindexes++;
+                }
+                else if( numofindexes == 1){
+                    strcpy(index2, "[");
+                    strcat(index2, stacktokens[stackcur]);
+                    strcat(index2, "]");
+                    numofindexes++;
+                }
+                pop();
+            }
+        }
+            // id    //    id[]    // id[][]
+        else if(strcmp(stacktokens[stackcur], "[") == 0){
+            stackcur++;
+            if(strcmp(stacktokens[stackcur], "]") == 0){
+                push(16, 1);
+                isexprfinished = false;
+            }
+        }
+        else if(check == -1) {
+            // undefined
+            printf("277 - error: indefined token\n");
+        }
+        else if(IDs[check].col == 0) {
+            // scalar
+            // REST is totally same with the number case above.
+            int type = stack[current-1];
+            if(type == 1 || type == 5 || type == 7){
+                strcat(line, stacktokens[stackcur]);
+                if(exprneeded[current-1] == 2){
+                    strcat(line, ", ");
+                    exprneeded[current-1] = exprneeded[current-1]-1;
+                    isexprfinished = false;
+                }
+                else if(exprneeded[current-1] == 1){
+                    strcat(line, ") ");
+                    pop();
+                    isexprfinished = true;
+                }
+            }
+            else if(type == 3 ){
+                strcat(line, stacktokens[stackcur]);
+                if(exprneeded[current-1] == 2){
+                    strcat(line, ", ");
+                    exprneeded[current-1] = exprneeded[current-1]-1;
+                    isexprfinished = false;
+                }
+                else if(exprneeded[current-1] == 1){
+                    strcat(line, ") ");
+                    pop();
+                    isexprfinished = true;
+                }
+            }
+            else if(type == 4){
+                strcat(line, stacktokens[stackcur]);
+                if(exprneeded[current-1] == 2){
+                    strcat(line, ", ");
+                    exprneeded[current-1] = exprneeded[current-1]-1;
+                    isexprfinished = false;
+                }
+                else if(exprneeded[current-1] == 1){
+                    strcat(line, ") ");
+                    pop();
+                    isexprfinished = true;
+                }
+            }
+            else if(type == 9 || type == 11){           // sqrt or tr
+                strcat(line, stacktokens[stackcur]);
+                strcat(line, ") ");
+                pop();
+                isexprfinished = true;
+            }
+            else if( type == 10 ){
+                strcat(line, stacktokens[stackcur]);
+                if( exprneeded[current-1] > 1 ){
+                    strcat(line, " , ");
+                    exprneeded[current-1] = exprneeded[current-1] - 1;
+                    isexprfinished = false;
+                } else if( exprneeded[current-1] == 1 ){
+                    strcat(line, ") ");
+                    exprneeded[current-1] = exprneeded[current-1] - 1;
+                    pop();
+                    isexprfinished = true;
+                }
+            }
+            else if( type == 16){
+                if( numofindexes == 0 ){
+                    strcpy(index1, "[");
+                    strcat(index1, stacktokens[stackcur]);
+                    strcat(index1, "]");
+                    numofindexes++;
+                }
+                else if( numofindexes == 1){
+                    strcpy(index2, "[");
+                    strcat(index2, stacktokens[stackcur]);
+                    strcat(index2, "]");
+                    numofindexes++;
+                }
+                pop();
+            }
+        }
+        else if(IDs[check].col == 1){
+            // vector
+            int type = stack[current-1];
+            if(numofindexes == 0){
+                switch (type) {
+                    case 2:
+                    case 6:
+                    case 8:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].row);
+                        strcat(line, string);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].col);
+                        strcat(line, string);
+                        if(exprneeded[current-1] == 2){
+                            strcat(line, ", ");
+                            exprneeded[current-1] = exprneeded[current-1]-1;
+                            isexprfinished = false;
+                        }
+                        else if(exprneeded[current-1] == 1){
+                            strcat(line, ") ");
+                            pop();
+                            isexprfinished = true;
+                        }
+                        break;
+                    case 3:
+                        if(exprneeded[current-1] == 2){
+                            strcat(line, stacktokens[stackcur]);
+                            strcat(line, ", ");
+                            sprintf(string, "%d", IDs[check].row);
+                            strcat(line, string);
+                            strcat(line, ", ");
+                            sprintf(string, "%d", IDs[check].col);
+                            strcat(line, string);
+                            strcat(line, ", ");
+                            exprneeded[current-1] = exprneeded[current-1] - 1;
+                            isexprfinished = false;
+                        }
+                        else{
+                            printf("448 - error: invalid numofdumbs\n");
+                        }
+                        break;
+                    case 4:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].row);
+                        strcat(line, string);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].col);
+                        strcat(line, string);
+                        if(exprneeded[current-1] == 2){
+                            printf("448 - error: invalid numofdumbs\n");
+                        }
+                        else if(exprneeded[current-1] == 1){
+                            strcat(line, ") ");
+                            pop();
+                            isexprfinished = true;
+                        }
+                        break;
+                    case 9:
+                    case 10:
+                        printf("447 - error : invalid type\n");
+                        break;
+                    case 11:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].row);
+                        strcat(line, string);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].col);
+                        strcat(line, string);
+                        strcat(line, ") ");
+                        pop();
+                        isexprfinished = true;
+                        break;
+                    case 16:
+                        printf("458 - error : invalid type\n");
+                }
+            }
+            else if(numofindexes == 1){
+                // id[expr1]  -->> id[expr1][0]
+                // which means we have a scalar
+                strcat(index1, "[0]");
+                switch (type) {
+                    case 0:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, index1);
+                        break;
+                    case 1:
+                    case 4:
+                    case 5:
+                    case 7:
+                        strcat(line, stacktokens[stackcur]);
+                        if(exprneeded[current-1] == 2){
+                            strcat(line, ", ");
+                            exprneeded[current-1] = exprneeded[current-1]-1;
+                            isexprfinished = false;
+                        }
+                        else if(exprneeded[current-1] == 1){
+                            strcat(line, ") ");
+                            pop();
+                            isexprfinished = true;
+                        }
+                        break;
+                    case 9:
+                    case 11:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, index1);
+                        strcat(line, ") ");
+                        pop();
+                        isexprfinished = true;
+                        break;
+                    case 10:
+                        strcat(line, stacktokens[stackcur]);
+                        if(exprneeded[current-1] == 2){
+                            strcat(line, ", ");
+                            exprneeded[current-1] = exprneeded[current-1]-1;
+                            isexprfinished = false;
+                        }
+                        else if(exprneeded[current-1] == 1){
+                            strcat(line, ") ");
+                            pop();
+                            isexprfinished = true;
+                        }
+                        ////case 16:
+
+                }
+                strcpy(index1, "");
+                numofindexes = 0;
+            }
+        }
+        else {
+            //// matrix
+            int type = stack[current - 1];
+            if (numofindexes == 0) {
+                switch (type) {
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 6:
+                    case 8:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].row);
+                        strcat(line, string);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].col);
+                        strcat(line, string);
+                        if (exprneeded[current - 1] == 2) {
+                            strcat(line, ", ");
+                            exprneeded[current - 1] = exprneeded[current - 1] - 1;
+                            isexprfinished = false;
+                        } else if (exprneeded[current - 1] == 1) {
+                            strcat(line, ") ");
+                            pop();
+                            isexprfinished = true;
+                        }
+                        break;
+                    case 11:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].row);
+                        strcat(line, string);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].col);
+                        strcat(line, string);
+                        strcat(line, ") ");
+                        isexprfinished = true;
+                        pop();
+                        break;
+                }
+            }
+            else if (numofindexes == 1) {
+                // represents a vector
+                switch (type) {
+                    case 0:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, index1);
+                        break;
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 6:
+                    case 8:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].col);
+                        strcat(line, string);
+                        strcat(line, ", [1]");
+                        if (exprneeded[current - 1] == 2) {
+                            strcat(line, ", ");
+                            exprneeded[current - 1] = exprneeded[current - 1] - 1;
+                            isexprfinished = false;
+                        } else if (exprneeded[current - 1] == 1) {
+                            strcat(line, ") ");
+                            pop();
+                            isexprfinished = true;
+                        }
+                        break;
+                    case 11:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, index1);
+                        strcat(line, ", ");
+                        sprintf(string, "%d", IDs[check].col);
+                        strcat(line, string);
+                        strcat(line, ", [1]");
+                        strcat(line, ") ");
+                        isexprfinished = true;
+                        pop();
+                        break;
+                }
+                strcpy(index1, "");
+                numofindexes = 0;
+            }
+            else if (numofindexes == 2) {         // scalar
+                switch (type) {
+                    case 0:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, index1);
+                        break;
+                    case 1:
+                    case 4:
+                    case 5:
+                    case 7:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, index1);
+                        strcat(line, index2);
+                        if (exprneeded[current - 1] == 2) {
+                            strcat(line, ", ");
+                            exprneeded[current - 1] = exprneeded[current - 1] - 1;
+                            isexprfinished = false;
+                        } else if (exprneeded[current - 1] == 1) {
+                            strcat(line, ") ");
+                            pop();
+                            isexprfinished = true;
+                        }
+                        break;
+                    case 9:
+                    case 11:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, index1);
+                        strcat(line, index2);
+                        strcat(line, ") ");
+                        pop();
+                        isexprfinished = true;
+                        break;
+                    case 10:
+                        strcat(line, stacktokens[stackcur]);
+                        strcat(line, index1);
+                        strcat(line, index2);
+                        if (exprneeded[current - 1] == 2) {
+                            strcat(line, ", ");
+                            exprneeded[current - 1] = exprneeded[current - 1] - 1;
+                            isexprfinished = false;
+                        } else if (exprneeded[current - 1] == 1) {
+                            strcat(line, ") ");
+                            pop();
+                            isexprfinished = true;
+                        }
+                        ////case 16:
+
+                }
+                strcpy(index1, "");
+                strcpy(index2, "");
+                numofindexes = 0;
+            }
+        }
+        while(isexprfinished) {
+            if (stack[current - 1] != 0) {     // there are operators in the line
+                if (exprneeded[current - 1] == 1) {     // expressions are finished
+                    exprneeded[current - 1] = exprneeded[current - 1] - 1;
+                    strcat(line, ") ");
+                    pop();
+                    isexprfinished = true;
+                }
+                else if (exprneeded[current - 1] > 1) {
+                    exprneeded[current - 1] = exprneeded[current - 1] - 1;
+                    strcat(line, ", ");
+                    isexprfinished = false;
+                }
+            }
+            else{
+                isexprfinished = false;
+            }
+        }
+        stackcur++;
+    }
+    strcat(line, ";\n");
+    // printf("%s", line);
+    return NULL;
+}
+
+
+
+
+
