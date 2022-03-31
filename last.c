@@ -25,7 +25,6 @@ bool isprevfactorscalar = false;
 bool istermscalar = false;
 bool isprevtermscalar = false;
 
-char *processStack(char str[N]);
 int  expr(char *) ;
 int  term(char *) ;
 int  moreterms(char *) ;
@@ -129,40 +128,9 @@ int main (int argc,char *argv[]) {
     return(0);
 }
 
-char *processStack(char str[N]){
-    char *p;
-    char *stacktoken;
-    char *token;
-    p = separateLine(str, strlen(str), false);
-    numtokens = 0;
-    memset(tokens, 0, sizeof(tokens[0][0]) * strlen(tokens[0]) * TOKENLENGTH);
-    numstacktokens = 0;
-    memset(stacktokens, 0, sizeof(stacktokens[0][0]) * strlen(stacktokens[0]) * TOKENLENGTH);
-    stackcur = 0;
-    while( (token = strsep(&p," ")) != NULL ){
-        while( (strcmp(token, " ") == 0) || (strcmp(token, "") == 0) || (strcmp(token, "\n") == 0)) {
-            token = strsep(&p," ");
-            if( token == NULL)
-                break;
-        }
-        if(token != NULL){
-            strcpy(tokens[numtokens], token);
-            numtokens++;
-        }
-        else break;
-    }
-    numstacktokens = numtokens;
-    printf("process:\n");
-    for(int i = 0; i < numtokens; i++){
-        strcpy(stacktokens[i], tokens[numtokens - i - 1]);
-        // printf("%d - %s\n", i, stacktokens[i]);
-    }
-    printf("\n\n");
-    return NULL;
-}
 
 char *separateLine(char line[], int length, bool nw){
-    if(strcat(line, "\n") == 0) return NULL;
+    if(strcmp(line, "\n") == 0) return NULL;
     static char result[256] = "";
     strcpy(result, "");
     for(int i = 0; i < length; i++) {
@@ -323,8 +291,9 @@ int expr(char *str)
         }
         else result = 3;
     }
-    strcat(str1,str2) ;
-    strcpy(str,str1) ;
+    // str1: term,   str2: moreterms
+    strcat(str2,str1) ;
+    strcpy(str,str2) ;
     //printf("263 - curr:%d\n", cur);
     return(result) ;
 }
@@ -350,8 +319,9 @@ int term(char *str)
         istermscalar = false;
         result = morefactorvalue;
     }
-    strcat(str1,str2) ;
-    strcpy(str,str1) ;
+    // str1: factor,   str2: morefactor
+    strcat(str2,str1) ;
+    strcpy(str,str2) ;
     return(result) ;
 }
 
@@ -366,17 +336,16 @@ int moreterms(char *str)
     if ( (strcmp(tokens[cur],"+") == 0 ) || (strcmp(tokens[cur],"-") == 0 ) ) {
         isprevtermscalar = istermscalar;
         strcpy(func,tokens[cur]) ;
-        strcat(func, " ");
         cur++ ;
         int termvalue =  term(str2);
         if(isprevtermscalar && istermscalar){
-            strcpy(str1, " scalar") ;
+            strcpy(str1, " ") ;
             strcat(str1, func);
-            strcat(str1, " ");
+            strcat(str1, "scalar ");
         } else if(!isprevfactorscalar && !isfactorscalar){
-            strcpy(str1, " matrix") ;
+            strcpy(str1, " ") ;
             strcat(str1, func);
-            strcat(str1, " ");
+            strcat(str1, "matrix ");
         } else{
             printf("incompatible types\n");
         }
@@ -397,10 +366,10 @@ int moreterms(char *str)
             else result = 3;
         }
     }
-    strcat(str2,str3) ;
-    strcat(str2,str1) ;
-    strcpy(str,str2) ;
-    // null:
+    // str1: operator,   str2: term,   str3: moreterms
+    strcat(str1,str2) ;
+    strcat(str1,str3) ;
+    strcpy(str,str1) ;
     return(result) ;
 }
 
@@ -439,9 +408,6 @@ int factor(char *str)
     //// From this point on, I added the parts for 'tr', 'choose' and 'sqrt'
     //// the parts for ( id | id[expr] | id[expr, expr] ) are left
     if( strcmp(tokens[cur],"tr") == 0 ){
-        char func[N] ;
-        func[0] = '\0' ;
-        strcpy(func,tokens[cur]) ;
         cur++;
         if ( strcmp(tokens[cur],"(") != 0 ) {
             printf("Error: expecting paranthesis\n") ;
@@ -458,18 +424,14 @@ int factor(char *str)
         }
         cur++;
         //// For now, I added the tokens in infix order for these functions, could be changed later.
+        strcat(str, " tr ");
         strcat(str, str1);
-        strcat(str, " ");
-        strcat(str, func);
         strcat(str, " ");
         if(exprvalue == 2) isfactorscalar = true;
         if(exprvalue == 3) isfactorscalar = false;
         return (exprvalue);
     }
     if( strcmp(tokens[cur],"sqrt") == 0 ){
-        char func[N] ;
-        func[0] = '\0' ;
-        strcpy(func,tokens[cur]) ;
         cur++;
         if ( strcmp(tokens[cur],"(") != 0 ) {
             printf("Error: expecting paranthesis\n") ;
@@ -486,9 +448,8 @@ int factor(char *str)
         }
         cur++;
         //// For now, I added the tokens in infix order for these functions, could be changed later.
+        strcat(str, " sqrt ");
         strcat(str, str1);
-        // strcat(str, " ");
-        strcat(str, func);
         strcat(str, " ");
         if(exprvalue == 2) isfactorscalar = true;
         return (exprvalue);
@@ -543,6 +504,7 @@ int factor(char *str)
             return(0) ;
         }
         cur++;
+        strcat(str, " choose ");
         strcat(str, str1);
         strcat(str, " ");
         strcat(str, str2);
@@ -550,12 +512,13 @@ int factor(char *str)
         strcat(str, str3);
         strcat(str, " ");
         strcat(str, str4);
-        strcat(str, "choose ");
+        strcat(str, " ");
         isfactorscalar = true;
         return (2);
     }
-    //// if the current token is an id......
 
+    char idname[N];
+    idname[0] = '\0' ;
     // adding to the str as <id>exp[]exp[] or <id>exp[] if vector
     int check = isID(tokens[cur]);
     if(check==-1){
@@ -565,15 +528,17 @@ int factor(char *str)
     }else if(IDs[check].col == 0){
         //variable is a scalar
         strcat(str, tokens[cur]);
+        strcat(str, " ");
         cur++;
         isfactorscalar = true;
         return 2;
 
     }else if(IDs[check].col == 1){
         //variable is a vector
-        strcat(str, tokens[cur]);
+        strcpy(idname, tokens[cur]);
         cur++;
         if(strcmp(tokens[cur], "[") != 0) {
+            strcat(str, idname);
             strcat(str, " ");
             isfactorscalar = false;
             return 3;
@@ -586,27 +551,30 @@ int factor(char *str)
             printf("ERROR expected scalar");
             return 0;
         }
-
         if(strcmp(tokens[cur], "]")!=0){
             printf("Error!! expected ]");
             return 0;
         }
         cur++;
-        strcat(str, str1);
         strcat(str, " [] ");
+        strcat(str, str1);
+        strcat(str, " ");
+        strcat(str, idname);
         //// Should we add [0] as well??
         isfactorscalar = true;
         return 2;
 
-    }else{
+    }
+    else{
         //variable is a matrix
-        strcat(str, tokens[cur]);
+        strcpy(idname, tokens[cur]);
+        strcat(idname, " ");
         cur++;
         char str2[N];
         str2[0] = '\0' ;
 
         if(strcmp(tokens[cur],"[")!=0){
-            strcat(str, " ");
+            strcat(str, idname);
             isfactorscalar = false;
             return 3;
 //            printf("error!, need [");
@@ -624,8 +592,10 @@ int factor(char *str)
                 printf("error!, need paranthesis");
                 return 0;
             }
-            strcat(str, str1);
             strcat(str, " [] ");
+            strcat(str, str1);
+            strcat(str, " ");
+            strcat(str, idname);
             isfactorscalar = false;
             return 3;
         }
@@ -640,10 +610,12 @@ int factor(char *str)
             return 0;
         }
         cur++;
+        strcat(str, " [] ");
         strcat(str, str1);
         strcat(str, " [] ");
         strcat(str, str2);
-        strcat(str, " [] ");
+        strcat(str, " ");
+        strcat(str, idname);
         isfactorscalar = true;
         return 2;
     }
@@ -664,13 +636,13 @@ int morefactors(char *str)
         cur++ ;
         int factorvalue = factor(str2);
         if(isprevfactorscalar && isfactorscalar){
-            strcpy(str1, " scalar* ") ;
+            strcpy(str1, " *scalar ") ;
         } else if(isprevfactorscalar && !isfactorscalar){
-            strcpy(str1, " scalarmatrix* ") ;
+            strcpy(str1, " *scalarmatrix ") ;
         } else if(!isprevfactorscalar && isfactorscalar){
-            strcpy(str1, " matrixscalar* ") ;
+            strcpy(str1, " *matrixscalar ") ;
         } else if(!isprevfactorscalar && !isfactorscalar){
-            strcpy(str1, " matrix* ") ;
+            strcpy(str1, " *matrix ") ;
         }
         isprevfactorscalar = isfactorscalar;
         int morefactorvalue = morefactors(str3);
@@ -684,10 +656,10 @@ int morefactors(char *str)
             result = morefactorvalue;
         }
     }
-    strcat(str2,str3) ;
-    strcat(str2,str1) ;
-    strcpy(str,str2) ;
-    // null:
+    // str1: operator,   str2: factor,   str3: morefactors
+    strcat(str1,str3) ;
+    strcat(str1,str2) ;
+    strcpy(str,str1) ;
     return(result) ;
 }
 
