@@ -28,7 +28,26 @@
 &nbsp;&nbsp;&nbsp;** Print vector\
 &nbsp;&nbsp;&nbsp;** Print scalar\
 &nbsp;&nbsp;&nbsp;** Printsep\
-4. Process the postfix string.
+&nbsp;&nbsp;&nbsp;** CopyMatrix\
+5. Process the postfix string.
+  
+6. for loop
+  
+7. matrix dimension check with ID type
+  
+8. id name check (_alphanumeric etc.)
+  
+9. assign statement, factor before = --> A[2,2] A[2] A --> function like process
+  
+10. recursion reverse
+  
+11. process stack minor problems (n=3, B[A[3,1]])
+  
+12. read line into process
+  
+13. print(Error Line) line number
+  
+14. documentation + comment
   
 
 -- 
