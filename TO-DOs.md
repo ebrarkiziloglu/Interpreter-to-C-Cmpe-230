@@ -31,11 +31,11 @@
 &nbsp;&nbsp;&nbsp;** CopyMatrix\
 5. Process the postfix string.
   
-6. for loop
+~~6. for loop~~
   
 7. matrix dimension check with ID type
   
-8. id name check (_alphanumeric etc.)
+~~8. id name check (_alphanumeric etc.)~~
   
 9. assign statement, factor before = --> A[2,2] A[2] A --> function like process
   
@@ -43,7 +43,7 @@
   
 11. process stack minor problems (n=3, B[A[3,1]])
   
-12. read line into process
+~~12. read line into process~~
   
 13. print(Error Line) line number
   
