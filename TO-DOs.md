@@ -5,8 +5,8 @@
 // ~~Comment~~
 
 1. Matrix dimensions in the expr-term-factor loop will be stored. int array or string can be used\
-~~2. During definitions, create struct and add id names into 'IDs'.~~\
-~~3. Read assingments, first token: id, second token: =, rest is: <expr>\~~
+~~2. During definitions, create struct and add id names into 'IDs'.\
+3. Read assingments, first token: id, second token: =, rest is: <expr>~~\
 4. Functions in the file.c:\
 ~~&nbsp;&nbsp;&nbsp;** Scalar addition\
 &nbsp;&nbsp;&nbsp;** Scalar multiplication\
