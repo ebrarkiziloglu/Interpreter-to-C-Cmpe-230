@@ -37,7 +37,7 @@
   
 ~~8. id name check (_alphanumeric etc.)~~
   
-9. assign statement, factor before = --> A[2,2] A[2] A --> function like process
+~~9. assign statement, factor before = --> A[2,2] A[2] A --> function like process~~
   
 10. recursion reverse
   
