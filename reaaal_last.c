@@ -125,7 +125,7 @@ int main (int argc,char *argv[]) {
             int typeOfLine = process(str, numtokens, cexpr);
             if( typeOfLine ==0){
                 printf("ERROR LINE %d\n", lineNum);
-                return 0;
+//                return 0;
             }
             if( typeOfLine == 1){
                 strcat(executableBlock, "\t");
@@ -204,7 +204,7 @@ int defineVariable(char *str){
         }
         row = tokens[cur];
         cur++;
-        if(isNumber(row) != 0){
+        if(is_integer(row) != 0){
             strcat(str, row); ////this is row
 
             if(maxDimension < atoi(row)) maxDimension = atoi(row);
@@ -228,7 +228,7 @@ int defineVariable(char *str){
         }
         row = tokens[cur];
         cur++;
-        if(isNumber(row) != 0){
+        if(is_integer(row) != 0){
             ////THIS TOKEN IS ROW
             strcat(str, row);
             if(maxDimension < atoi(row)) maxDimension = atoi(row);
@@ -244,7 +244,7 @@ int defineVariable(char *str){
         column = tokens[cur];
         cur++;
         // column should be num
-        if(isNumber(column) != 0){
+        if(is_integer(column) != 0){
             strcat(str, column);
 
             if(maxDimension < atoi(column)) maxDimension = atoi(column);
@@ -314,28 +314,70 @@ int process(char *str, int numTokens, char *res){
 
         int idCheck = isID(tokens[cur]);
         cur++;
+        char row[10], col[10];
+        row[0] = '\0';
+        col[0] = '\0';
 
         if(idCheck==-1){
             printf("ERROR! 295");
             return 0;
         }
         if(IDs[idCheck].col==0){
-            strcat(res, "printf(\"%d\", ");
+            strcat(res, "printf(\"%f\", ");
             strcat(res, IDs[idCheck].name);
             strcat(res, ");");
+        }else if(IDs[idCheck].col==1){
+            if(strcmp(tokens[cur],"[")==0){
+                cur++;
+                strcat(res, "printf(\"%f\", ");
+                strcat(res, IDs[idCheck].name);
+                strcat(res, "[");
+                strcat(res, tokens[cur]);
+                cur+=2;
+                strcat(res, "-1][0]);");
+            }else{
+                strcat(res, "printMatrix(");
+                sprintf(row, "%d", IDs[idCheck].row);
+                strcat(res, row);
+                strcat(res, ", ");
+                strcat(res, "1");
+                strcat(res, ", ");
+                strcat(res, IDs[idCheck].name);
+                strcat(res, ");");
+            }
         }else{
-            char row[10], col[10];
-            row[0] = '\0';
-            col[0] = '\0';
-            strcat(res, "printMatrix(");
-            sprintf(row, "%d", IDs[idCheck].row);
-            strcat(res, row);
-            strcat(res, ", ");
-            sprintf(col, "%d", IDs[idCheck].col);
-            strcat(res, col);
-            strcat(res, ", ");
-            strcat(res, IDs[idCheck].name);
-            strcat(res, ");");
+            if(strcmp(tokens[cur], "[")!=0) {
+                cur++;
+                strcat(res, "printMatrix(");
+                sprintf(row, "%d", IDs[idCheck].row);
+                strcat(res, row);
+                strcat(res, ", ");
+                sprintf(col, "%d", IDs[idCheck].col);
+                strcat(res, col);
+                strcat(res, ", ");
+                strcat(res, IDs[idCheck].name);
+                strcat(res, ");");
+            }else if(strcmp(tokens[cur], "[")==0 && strcmp(tokens[cur+3], "[")==0){
+                cur++;
+                strcat(res, "printf(\"%f\", ");
+                strcat(res, IDs[idCheck].name);
+                strcat(res, "[");
+                strcat(res, tokens[cur]);
+                cur+=2;
+                strcat(res, "-1][");
+                strcat(res, tokens[cur]);
+                cur+=2;
+                strcat(res, "-1]);");
+            }else{
+                strcat(res, "printMatrix(");
+                strcat(res, "1");
+                strcat(res, ", ");
+                sprintf(col, "%d", IDs[idCheck].col);
+                strcat(res, col);
+                strcat(res, ", ");
+                strcat(res, IDs[idCheck].name);
+                strcat(res, ");");
+            }
         }
 
         if(strcmp(tokens[cur],")")!=0){
@@ -1123,10 +1165,16 @@ int is_integer(char *token){
 }
 
 int isNumber(char s[]){
-    for (int i = 0; s[i]!= '\0'; i++)
-    {
-        if (isdigit(s[i]) == 0)
+    char *ptr = s;
+    int numDots = 0;
+    for (int i = 0; s[i]!= '\0'; i++){
+        if(ptr[i]== '.'){
+            numDots++;
+        }else if (isdigit(s[i]) == 0)
             return 0;
+    }
+    if(numDots>1){
+        return 0;
     }
     return 1;
 }
