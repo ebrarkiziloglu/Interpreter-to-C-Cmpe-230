@@ -41,7 +41,7 @@
   
 10. recursion reverse
   
-11. process stack minor problems (n=3, B[A[3,1]])
+11. process stack minor problems ( ~~n=3~~ , B[A[3,1]])
   
 ~~12. read line into process~~
   
