@@ -124,7 +124,7 @@ int main (int argc,char *argv[]) {
             char str[N] = "";
             int typeOfLine = process(str, numtokens, cexpr);
             if( typeOfLine ==0){
-                printf("ERROR LINE %d", lineNum);
+                printf("ERROR LINE %d\n", lineNum);
                 return 0;
             }
             if( typeOfLine == 1){
