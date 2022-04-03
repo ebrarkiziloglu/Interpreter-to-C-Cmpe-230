@@ -67,6 +67,8 @@ struct ID{
     //these dimensions can be 0 for scalars
     int row;
     int col;
+    //type=> scalar:7 vector:8 matrix:9
+    int type;
 };
 
 struct ID IDs[MAXIDS] ;
@@ -276,8 +278,16 @@ int defineVariable(char *str){
             a.name[i] = name[i];
             i++;
         }
+        if(strcmp(type, "vector")==0){
+            a.type=8;
+        }else if(strcmp(type, "matrix")==0){
+            a.type=9;
+        }else{
+            a.type=7;
+        }
         IDs[currentID] = a;
         currentID++;
+
         return 1;
     }
 }
@@ -322,11 +332,14 @@ int process(char *str, int numTokens, char *res){
             printf("ERROR! 295");
             return 0;
         }
-        if(IDs[idCheck].col==0){
+        if(IDs[idCheck].type==7){
+            //scalar print
             strcat(res, "printf(\"%f\", ");
             strcat(res, IDs[idCheck].name);
             strcat(res, ");");
-        }else if(IDs[idCheck].col==1){
+
+        }else if(IDs[idCheck].type==8){
+            //vector
             if(strcmp(tokens[cur],"[")==0){
                 cur++;
                 strcat(res, "printf(\"%f\", ");
@@ -347,7 +360,6 @@ int process(char *str, int numTokens, char *res){
             }
         }else{
             if(strcmp(tokens[cur], "[")!=0) {
-                cur++;
                 strcat(res, "printMatrix(");
                 sprintf(row, "%d", IDs[idCheck].row);
                 strcat(res, row);
@@ -357,7 +369,7 @@ int process(char *str, int numTokens, char *res){
                 strcat(res, ", ");
                 strcat(res, IDs[idCheck].name);
                 strcat(res, ");");
-            }else if(strcmp(tokens[cur], "[")==0 && strcmp(tokens[cur+3], "[")==0){
+            }else if(strcmp(tokens[cur], "[")==0 && strcmp(tokens[cur+2], ",")==0){
                 cur++;
                 strcat(res, "printf(\"%f\", ");
                 strcat(res, IDs[idCheck].name);
@@ -1017,7 +1029,7 @@ int factor(char *str)
         printf("ERROR: undefined id");
         return 0;
 
-    }else if(IDs[check].col == 0){
+    }else if(IDs[check].type==7){
         //variable is a scalar
         strcat(str, tokens[cur]);
         strcat(str, " ");
@@ -1025,7 +1037,7 @@ int factor(char *str)
         isfactorscalar = true;
         return 2;
 
-    }else if(IDs[check].col == 1){
+    }else if(IDs[check].type==8){
         //variable is a vector
         strcpy(idname, tokens[cur]);
         cur++;
