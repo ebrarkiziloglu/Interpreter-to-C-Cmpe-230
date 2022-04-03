@@ -38,7 +38,6 @@ bool isfactorscalar = false;
 bool isprevfactorscalar = false;
 bool istermscalar = false;
 bool isprevtermscalar = false;
-bool inDefPart = true;
 
 int  expr(char *) ;
 int  term(char *) ;
@@ -58,6 +57,7 @@ int isAssign();
 int findComma();
 int findColon();
 int isValidVarName(char* name);
+void editVarName(char *old, char *new);
 
 struct ID{
     char name[20];
@@ -69,13 +69,6 @@ struct ID{
 struct ID IDs[MAXIDS] ;
 
 int main (int argc,char *argv[]) {
-
-//    struct ID x = {"x", 0,0};
-//    struct ID i = {"i", 0,0};
-//    struct ID A = {"A", 2, 2};
-//    IDs[0] = x;
-//    IDs[1] = A;
-//    IDs[2] = i;
 
     strcpy(result, "");
     char *q;
@@ -130,17 +123,9 @@ int main (int argc,char *argv[]) {
                 printf("ERROR LINE %d", lineNum);
                 return 0;
             }
-            /*           if(process(str, numtokens, cexpr)==0){
-                           printf("ERROR IN FILE!");
-                           return 0;
-                       }*/
-            //           printf("%s\n", str);
-//            processStack(str, cexpr);
             strcat(result, cexpr);
             strcat(result, "\n");
         }
-        //       expr(str);
-
     }
 
     if(isInForLoop1==true || isInForLoop2==true){
@@ -151,7 +136,6 @@ int main (int argc,char *argv[]) {
 //    printf("CFile is:\n%s\n", cfile);
     return(0);
 }
-
 
 char *separateLine(char line[], int length, bool nw){
     if(strcat(line, "\n") == 0) return NULL;
@@ -299,9 +283,6 @@ int process(char *str, int numTokens, char *res){
     int assignment = isAssign();
 
     int exp1val, exp2val, exp3val, exp4val, exp5val, exp6val;
-
-//    char *forLine = "";
-//    strcpy(forLine, " ");
 
     if(strcmp(tokens[cur], "scalar")==0 || strcmp(tokens[cur], "vector")==0 || strcmp(tokens[cur], "matrix")==0){
         defineVariable(res);
@@ -739,11 +720,12 @@ int moreterms(char *str){
 
 int assign(int numTokens, char* res, int equalIndex){
 
-    char str1[N], str2[N], processStr[N], processStr2[N];
+    char str1[N], str2[N], processStr[N], processStr2[N], editVar[N];
     str1[0] = '\0';
     str2[0] = '\0';
     processStr[0] = '\0';
     processStr2[0] = '\0';
+    editVar[0] = '\0';
 
     sprintf(tokens[equalIndex],"$") ;
 
@@ -761,7 +743,8 @@ int assign(int numTokens, char* res, int equalIndex){
 
         if(exprvalue == 2){
             processStack(str2, processStr);
-            strcat(res, str1);
+            editVarName(str1, editVar);
+            strcat(res, editVar);
             strcat(res, "=");
             strcat(res, processStr);
             return 1;
@@ -775,7 +758,8 @@ int assign(int numTokens, char* res, int equalIndex){
         //if token is {
         if(strcmp(tokens[cur],"{")==0){
             cur++;
-            strcat(res, str1);
+            editVarName(str1, editVar);
+            strcat(res, editVar);
             strcat(res, "= ");
             strcat(res, "{");
 
@@ -810,7 +794,8 @@ int assign(int numTokens, char* res, int equalIndex){
     }
 
     processStack(str2, processStr);
-    strcat(res, str1);
+    editVarName(str1, editVar);
+    strcat(res, editVar);
     strcat(res, " = ");
     strcat(res, processStr);
     return 1;
@@ -1732,6 +1717,43 @@ int findComma(){
         }
     }
     return -1;
+}
+
+void editVarName(char *old, char *new){
+    char *varToken = "";
+    char varTokens[N][N];
+    int count=0;
+    char varDims[100];
+    varDims[0] = '\0';
+
+    while( (varToken = strsep(&old," ")) != NULL ){
+        while( (strcmp(varToken, " ") == 0) || (strcmp(varToken, "") == 0) || (strcmp(varToken, "\n") == 0)) {
+            varToken = strsep(&old," ");
+            if( varToken == NULL)
+                break;
+        }
+        if(varToken != NULL){
+            strcpy(varTokens[count], varToken);
+            count++;
+        }
+        else break;
+    }
+    if(strcmp(varTokens[0], "[]")==0){
+        strcat(varDims, "[");
+        strcat(varDims, varTokens[1]);
+        strcat(varDims, "]");
+        if(strcmp(varTokens[2], "[]")==0){
+            strcat(varDims, "[");
+            strcat(varDims, varTokens[3]);
+            strcat(varDims, "]");
+            strcat(new, varTokens[4]);
+        }else{
+            strcat(new, varTokens[2]);
+        }
+        strcat(new, varDims);
+    }else {
+        strcat(new, varTokens[0]);
+    }
 }
 
 int isValidVarName(char* name){
