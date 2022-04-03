@@ -49,7 +49,7 @@
   
 14. documentation + comment
   
-15. Check whether an executable statement is neither print/for not assignment statement, and give ERROR. For example,  ( n # = 3 + x ) should give an ERROR.
+~~15. Check whether an executable statement is neither print/for not assignment statement, and give ERROR. For example,  ( n # = 3 + x ) should give an ERROR.~~
   
 
 -- 
