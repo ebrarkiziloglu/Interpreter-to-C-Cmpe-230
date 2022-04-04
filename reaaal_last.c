@@ -1410,7 +1410,7 @@ char *processStack(char str[N], char *line){
             // undefined
             printf("277 - error: indefined token\n");
         }
-        else if(IDs[check].col == 0) {
+        else if(IDs[check].type== 7) {
             // scalar
             // REST is totally same with the number case above.
             int type = stack[current-1];
@@ -1495,7 +1495,7 @@ char *processStack(char str[N], char *line){
                 }
             }
         }
-        else if(IDs[check].col == 1){
+        else if(IDs[check].type== 8){
             // vector
             int type = stack[current-1];
             if(numofindexes == 0){
