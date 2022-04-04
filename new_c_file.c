@@ -15,6 +15,7 @@ void transposeMatrix(int n, int m, float a[n][m], float *c[]);
 void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);
 void printSep();
 float choose(float a, float b, float c, float d);
+float *ptr;
 
 int main() {
 
@@ -23,7 +24,7 @@ int main() {
 }
 
 void allocateMatrix(float *a[], int n, int m){
-    float *ptr = (float *)calloc(m*n, sizeof(float));
+    ptr = (float *)calloc(m*n, sizeof(float));
     for(int i=0; i<n; i++){
         a[i] = ptr+(m*i);
     }
