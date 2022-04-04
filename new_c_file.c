@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 void allocateMatrix(float *A[], int n, int m);
-void subtractMatrix(float *A[], float *B[], float *C[], int n, int m);
-void multiplyMatrix(float *A[], float *B[], float *C[], int n, int m);
+void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);
+void multiplyMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);
 void copyMatrix( float *x[], int n, int m, float a[n][m]);
 void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);
 
