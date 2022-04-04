@@ -21,7 +21,7 @@ float x[3][1];
 float y[3][1];
 float r;
 float i;
-
+float *ptr;
 
 int main() {
 
@@ -29,38 +29,42 @@ int main() {
     declareMatrix(sizeof(A)/sizeof(A[0]), sizeof(A[0])/sizeof(A[0][0]), x1, A);
     float x11[(sizeof(x)/sizeof(x[0])) * (sizeof(x[0])/sizeof(x[0][0]))] = { 1, 1, 1};
     declareMatrix(sizeof(x)/sizeof(x[0]), sizeof(x[0])/sizeof(x[0][0]), x11, x);
+
     for(int i=1 ; i<=10 ; i += 1 ){
         float *y1[sizeof(A)/sizeof(A[0])];
         allocateMatrix(y1, sizeof(A)/sizeof(A[0]), sizeof(x[0])/sizeof(x[0][0]));
         multiplyMatrix(sizeof(A)/sizeof(A[0]), sizeof(A[0])/sizeof(A[0][0]), sizeof(x[0])/sizeof(x[0][0]), A, x, y1);
         copyMatrix(y1, 3, 1, y);
+        free(ptr);
 
         float *y2[sizeof(y)/sizeof(y[0])];
         allocateMatrix(y2, sizeof(y)/sizeof(y[0]), sizeof(y[0])/sizeof(y[0][0]));
         subtractMatrix(sizeof(y)/sizeof(y[0]), sizeof(y[0])/sizeof(y[0][0]), y, x, y2);
         float y3[sizeof(y)/sizeof(y[0])][sizeof(y[0])/sizeof(y[0][0])];
         copyMatrix(y2, sizeof(y)/sizeof(y[0]), sizeof(y[0])/sizeof(y[0][0]), y3);
+        free(ptr);
 
         float *y4[sizeof(y3[0])/sizeof(y3[0][0])];
         allocateMatrix(y4, sizeof(y3[0])/sizeof(y3[0][0]), sizeof(y3)/sizeof(y3[0]));
         transposeMatrix(sizeof(y3)/sizeof(y3[0]), sizeof(y3[0])/sizeof(y3[0][0]), y3, y4);
         float y5[sizeof(y3[0])/sizeof(y3[0][0])][sizeof(y3)/sizeof(y3[0])];
         copyMatrix(y4, sizeof(y3[0])/sizeof(y3[0][0]), sizeof(y3)/sizeof(y3[0]), y5);
+        free(ptr);
 
         float *y6[sizeof(y)/sizeof(y[0])];
         allocateMatrix(y6, sizeof(y)/sizeof(y[0]), sizeof(y[0])/sizeof(y[0][0]));
         subtractMatrix(sizeof(y)/sizeof(y[0]), sizeof(y[0])/sizeof(y[0][0]), y, x, y6);
         float y7[sizeof(y)/sizeof(y[0])][sizeof(y[0])/sizeof(y[0][0])];
         copyMatrix(y6, sizeof(y)/sizeof(y[0]), sizeof(y[0])/sizeof(y[0][0]), y7);
-
-
+        free(ptr);
 
         float *y8[sizeof(y5) / sizeof(y5[0])];
         allocateMatrix(y8, sizeof(y5) / sizeof(y5[0]), sizeof(y7[0])/sizeof(y7[0][0]));
         multiplyMatrix(sizeof(y5) / sizeof(y5[0]), sizeof(y5[0]) / sizeof(y5[0][0]), sizeof(y7[0]) / sizeof(y7[0][0]), y5, y7, y8);
         float y9[sizeof(y5) / sizeof(y5[0])][sizeof(y7[0])/sizeof(y7[0][0])];
         copyMatrix(y8, sizeof(y5) / sizeof(y5[0]), sizeof(y7[0])/sizeof(y7[0][0]), y9);
-        copyMatrix(y8, sizeof(y5) / sizeof(y5[0]), sizeof(y7[0])/sizeof(y7[0][0]), T);
+        copyMatrixtoMatrix(sizeof(y5) / sizeof(y5[0]), sizeof(y7[0])/sizeof(y7[0][0]), T, y9);
+        free(ptr);
 
         r = sqrt(T[0][0]);
         printf("%f\n", r);
@@ -68,7 +72,6 @@ int main() {
 
 
     }
-
     printSep();
     printMatrix(sizeof(x) / sizeof(x[0]), sizeof(x[0])/sizeof(x[0][0]), x);
 
@@ -76,7 +79,7 @@ int main() {
 }
 
 void allocateMatrix(float *a[], int n, int m){
-    float *ptr = (float *)calloc(m*n, sizeof(float));
+    ptr = (float *)calloc(m*n, sizeof(float));
     for(int i=0; i<n; i++){
         a[i] = ptr+(m*i);
     }
