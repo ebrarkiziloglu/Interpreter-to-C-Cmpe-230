@@ -1,73 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
 
 void allocateMatrix(float *A[], int n, int m);
 void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);
-void multiplyMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);
+void multiplyMatrix(int n, int k, int m, float a[n][m], float b[m][k], float *c[]);
 void copyMatrix( float *x[], int n, int m, float a[n][m]);
 void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);
-
-float A[3][4], B[3][4], C[3][4], D[3][4], K[3][4];
+void declareMatrix(int row, int column, float temp[], float a[row][column]);
+void printMatrix(int r, int c, float matrix[r][c]);
+int isInt(float x);
+void transposeMatrix(int n, int m, float a[n][m], float *c[]);
+void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);
+void printSep();
 
 int main() {
-    int row = 3;
-    int column = 4;
 
-    float *E[3], *res[3];
-    allocateMatrix(E, row, column);
-    allocateMatrix(res, row, column);
-
-    float k=1;
-    for(int i=0; i<row; i++){
-        for(int j=0; j<column; j++){
-            A[i][j] = k;
-            B[i][j] = k;
-            C[i][j] = k;
-            k++;
-        }
-    }
-
-    for(int i=0; i<row; i++){
-        for(int j=0; j<column; j++){
-            printf("%f ", A[i][j]);
-        }
-        printf("\n");
-    }
-
-    addMatrix(row, column, A, B, E);
-    printf("\nE = A+B after addition\n");
-    for(int i=0; i<row; i++){
-        for(int j=0; j<column; j++){
-            printf("%f ", E[i][j]);
-        }
-        printf("\n");
-    }
-    copyMatrix(E, row, column, D);
-    printf("\nD = E after copy: \n");
-    for(int i=0; i<row; i++){
-        for(int j=0; j<column; j++){
-            printf("%f ", D[i][j]);
-        }
-        printf("\n");
-    }
-
-    addMatrix(row, column, D, C, res);
-    printf("\nres = D+B after addition\n");
-    for(int i=0; i<row; i++){
-        for(int j=0; j<column; j++){
-            printf("%f ", res[i][j]);
-        }
-        printf("\n");
-    }
-
-    copyMatrix(res, row, column, K);
-    printf("\n[3][4] global result:\n");
-    for(int i=0; i<row; i++){
-        for(int j=0; j<column; j++){
-            printf("%f ", K[i][j]);
-        }
-        printf("\n");
-    }
+    
     return 0;
 }
 
@@ -103,13 +53,68 @@ void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
     }
 }
 
-void multiplyMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
+void multiplyMatrix(int n, int k, int m, float a[n][k], float b[k][m], float *c[]){
     for(int i=0; i<n; i++){
         for(int j=0; j<m; j++){
             c[i][j] = 0;
-            for(int k=0; k<n; k++){
-                c[i][j] += a[i][k]*b[k][j];
+            for(int l=0; l<k; l++){
+                c[i][j] += a[i][l]*b[l][j];
             }
         }
     }
+}
+
+void transposeMatrix(int n, int m, float a[n][m], float *c[]){
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            c[j][i] = a[i][j];
+        }
+    }
+}
+
+
+void declareMatrix(int row, int column, float temp[], float a[row][column]){
+    int k = 0;
+    for(int i = 0; i < row; i ++){
+        for(int j = 0; j < column; j ++){
+            a[i][j] = temp[k];
+            k++;
+        }
+    }
+}
+
+void printMatrix(int r, int c, float matrix[r][c]){
+    float temp;
+    for(int i=0; i<r; i++){
+        for(int j=0; j<c; j++){
+            temp = matrix[i][j];
+            if(isInt(temp)==1)
+                printf("%d ", (int)temp);
+            else
+                printf("%f ", temp);
+        }
+        printf("\n");
+    }
+}
+
+int isInt(float x){
+    int n = (int)x;
+    double check = x-n;
+    if(check>0)
+        return 0;
+    return 1;
+}
+
+void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]){
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            a[i][j] = b[i][j];
+        }
+    }
+    return;
+}
+
+void printSep(){
+    printf("----------\n");
+    return ;
 }
