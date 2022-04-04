@@ -1,5 +1,10 @@
 
 //// TO-DOs:
+
+- Matlangde index 1 dediği aslında 0.
+- Ve for döngüsünde upper bound dediği expr2 dahil, o yüzden küçük eşit dememiz lazım
+- Bir de temp variablelara isim verirken globallara denk gelmeyecek şekilde zekice bir şeyler düşünelim :D
+- Bir de for un içinde i yi float olarak tanımlamışız onu da int yapalım
 - ~~factor fonksiyonunda id lerden sonra, 'str' ye type ekleyecegiz.~~
 
 // ~~Comment~~
