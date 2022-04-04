@@ -123,6 +123,6 @@ int isInt(float x){
 
 char *printSep(){
     char *p;
-    p = "printf(\"----------\\n\");\n";
+    p = "printf(\"------------\\n\");\n";
     return p;
 }
