@@ -14,6 +14,7 @@ int isInt(float x);
 void transposeMatrix(int n, int m, float a[n][m], float *c[]);
 void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);
 void printSep();
+float choose(float a, float b, float c, float d);
 
 int main() {
 
@@ -117,4 +118,10 @@ void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]){
 void printSep(){
     printf("----------\n");
     return ;
+}
+
+float choose(float a, float b, float c, float d){
+    if( a == 0.0)  return b;
+    else if( a > 0 ) return c;
+    else return d;
 }
