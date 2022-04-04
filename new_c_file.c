@@ -94,20 +94,21 @@ void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
     }
 }
 
-void subtractMatrix(float *A[], float *B[], float *C[], int n, int m){
+
+void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
     for(int i=0; i<n; i++){
         for(int j=0; j<m; j++){
-            C[i][j] = A[i][j] - B[i][j];
+            c[i][j] = a[i][j] - b[i][j];
         }
     }
 }
 
-void multiplyMatrix(float *A[], float *B[], float *C[], int n, int m){
+void multiplyMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
     for(int i=0; i<n; i++){
         for(int j=0; j<m; j++){
-            C[i][j] = 0;
+            c[i][j] = 0;
             for(int k=0; k<n; k++){
-                C[i][j] += A[i][k]*B[k][j];
+                c[i][j] += a[i][k]*b[k][j];
             }
         }
     }
