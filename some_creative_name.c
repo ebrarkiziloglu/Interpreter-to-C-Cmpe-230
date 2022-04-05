@@ -840,8 +840,8 @@ int assign(int numTokens, char* res, int equalIndex){
             while(isID(temp_name)!=-1){
                 strcat(temp_name, "_");
             }
- /*           editVarName(str1, editVar);
-            strcat(res, editVar);*/
+            /*           editVarName(str1, editVar);
+                       strcat(res, editVar);*/
             strcat(res, "float ");
             strcat(res, temp_name);
             strcat(res, "[");
@@ -896,10 +896,30 @@ int assign(int numTokens, char* res, int equalIndex){
     editVarName(str1, editVar);
     strcat(res, processStr);
     strcat(res, "\n\t");
-    strcat(res, editVar);
-    strcat(res, " = ");
-    strcat(res, lasttoken);
-    strcat(res, ";\n");
+    if(typeoftokensinstack[currentindexofstack] == 7 || typeoftokensinstack[currentindexofstack] == -7){
+        strcat(res, editVar);
+        strcat(res, " = ");
+        strcat(res, lasttoken);
+        strcat(res, ";\n");
+    }
+    else{
+        // row = sizeof(x)/sizeof(x[0]);
+        // column = sizeof(x[0])/sizeof(x[0][0]);
+        // copyMatrixtoMatrix( row, column, float a[r][c], float b[r][c]);
+        strcat(res, "row = sizeof( ");
+        strcat(res, lasttoken);
+        strcat(res, ")/sizeof(");
+        strcat(res, lasttoken);
+        strcat(res, "[0]);\n\tcolumn = sizeof(");
+        strcat(res, lasttoken);
+        strcat(res, "[0])/sizeof(");
+        strcat(res, lasttoken);
+        strcat(res, "[0][0]);\n\tcopyMatrixtoMatrix(row, column, ");
+        strcat(res, editVar);
+        strcat(res, " , ");
+        strcat(res, lasttoken);
+        strcat(res, " );\n");
+    }
     if(isInForLoop2) strcat(res, "\t\t");
     else if(isInForLoop1) strcat(res, "\t\t");
     return 1;
@@ -910,8 +930,6 @@ int factor(char *str)
     char str1[N] ;
     int result = 1;
     str1[0] = '\0' ;
-    //printf("325 - curr:%d\n", cur);
-    // printf("141 - %s\n",tokens[cur]) ;
     if ( is_integer(tokens[cur])  ) {
         strcpy(str,tokens[cur]) ;
         strcat(str," ") ;
@@ -928,7 +946,6 @@ int factor(char *str)
             return(0) ;
         }
         if ( strcmp(tokens[cur],")") != 0 ) {
-            printf("Error: expecting parenthesis\n") ;
             return(0) ;
         }
         cur++ ;
@@ -942,7 +959,6 @@ int factor(char *str)
     if( strcmp(tokens[cur],"tr") == 0 ){
         cur++;
         if ( strcmp(tokens[cur],"(") != 0 ) {
-            printf("Error: expecting paranthesis\n") ;
             return(0) ;
         }
         cur++;
@@ -951,7 +967,6 @@ int factor(char *str)
             return(0) ;
         }
         if ( strcmp(tokens[cur],")") != 0 ) {
-            printf("Error: expecting paranthesis\n") ;
             return(0) ;
         }
         cur++;
@@ -965,7 +980,6 @@ int factor(char *str)
     if( strcmp(tokens[cur],"sqrt") == 0 ){
         cur++;
         if ( strcmp(tokens[cur],"(") != 0 ) {
-            printf("Error: expecting paranthesis\n") ;
             return(0) ;
         }
         cur++;
@@ -974,7 +988,6 @@ int factor(char *str)
             return(0) ;
         }
         if ( strcmp(tokens[cur],")") != 0 ) {
-            printf("Error: expecting paranthesis\n") ;
             return(0) ;
         }
         cur++;
@@ -990,7 +1003,6 @@ int factor(char *str)
         str2[0] = str3[0] = str4[0] = '\0' ;
         cur++;
         if ( strcmp(tokens[cur],"(") != 0) {
-            printf("Error: expecting paranthesis\n") ;
             return(0) ;
         }
         cur++;
@@ -1000,7 +1012,6 @@ int factor(char *str)
             return(0) ;
         }
         if ( strcmp(tokens[cur],",") != 0 ) {
-            printf("Error: expecting comma\n") ;
             return(0) ;
         }
         cur++;
@@ -1010,7 +1021,6 @@ int factor(char *str)
             return(0) ;
         }
         if ( strcmp(tokens[cur],",") != 0 ) {
-            printf("Error: expecting comma\n") ;
             return(0) ;
         }
         cur++;
@@ -1020,7 +1030,6 @@ int factor(char *str)
             return(0) ;
         }
         if ( strcmp(tokens[cur],",") != 0 ) {
-            printf("Error: expecting comma\n") ;
             return(0) ;
         }
         cur++;
@@ -1030,7 +1039,6 @@ int factor(char *str)
             return(0) ;
         }
         if ( strcmp(tokens[cur],")") != 0 ) {
-            printf("Error: expecting paranthesis\n") ;
             return(0) ;
         }
         cur++;
@@ -1071,17 +1079,13 @@ int factor(char *str)
             strcat(str, " ");
             isfactorscalar = false;
             return 3;
-//            printf("ERROR expected expression");
-//            return 0;
         }
         cur++;
         int expr1value = expr(str1);
         if( expr1value != 2){
-            printf("ERROR expected scalar");
             return 0;
         }
         if(strcmp(tokens[cur], "]")!=0){
-            printf("Error!! expected ]");
             return 0;
         }
         cur++;
@@ -1105,36 +1109,22 @@ int factor(char *str)
             strcat(str, idname);
             isfactorscalar = false;
             return 3;
-//            printf("error!, need [");
-//            return 0;
         }
         cur++;
         int expr1value = expr(str1);
         if(expr1value != 2){
-            printf("error!, need scalar");
             return 0;
         }
         if(strcmp(tokens[cur],",")!=0){
-            //// id[expr] but points to a vector:
-            if(strcmp(tokens[cur],"]")!=0){
-                printf("error!, need paranthesis");
-                return 0;
-            }
-            strcat(str, str1);
-            strcat(str, " [] ");
-            strcat(str, idname);
-            strcat(str, " ");
-            isfactorscalar = false;
-            return 3;
+            // id[expr] but points to a vector: not valid
+            return 0;
         }
         cur++;
         int expr2value = expr(str2);
         if(expr2value != 2){
-            printf("error!, need scalar");
             return 0;
         }
         if(strcmp(tokens[cur],"]")!=0){
-            printf("error!, need ]");
             return 0;
         }
         cur++;
@@ -1147,7 +1137,6 @@ int factor(char *str)
         isfactorscalar = true;
         return 2;
     }
-    printf("Error: expecting factor\n") ;
     return(0) ;
 }
 
@@ -1265,10 +1254,7 @@ int processStack(char str[N], char *line, char *lasttoken){
         }
         else break;
     }
-//    printf("process:\n");
-//    for(int i = 0; i < numstacktokens; i++){
-//        printf("%d - %s\n", i, stacktokens[i]);
-//    }
+
     strcat(line, "\t");
     while(stackcur < numstacktokens){
         //// * is not finished yet
@@ -1811,9 +1797,8 @@ int processStack(char str[N], char *line, char *lasttoken){
             else { return 0;}
         }
         stackcur++;
-//        printf("556 - line:\t%s\n", line);
     }
-    printf("%s\n", line);
+//    printf("%s\n", line);
     strcpy(lasttoken, stack[currentindexofstack]);
     return 1;
 }
