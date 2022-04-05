@@ -32,7 +32,6 @@ int main() {
 
     for(int i=1 ; i<=10 ; i += 1 ){
 
-        // float y0[sizeof(A)/sizeof(A[0])][sizeof(x[0])/sizeof(x[0][0])];
         float *y1[sizeof(A)/sizeof(A[0])];
         multiplyMatrix(sizeof(A)/sizeof(A[0]), sizeof(A[0])/sizeof(A[0][0]), sizeof(x[0])/sizeof(x[0][0]), A, x, y1);
         copyMatrix(y1, 3, 1, y);
@@ -87,7 +86,6 @@ void copyMatrix( float *x[], int n, int m, float a[n][m]){
 }
 
 void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
-
     allocateMatrix(c, n, m);
 
     for(int i=0; i<n; i++){
@@ -99,7 +97,6 @@ void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
 
 
 void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
-
     allocateMatrix(c, n, m);
 
     for(int i=0; i<n; i++){
@@ -110,7 +107,6 @@ void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
 }
 
 void multiplyMatrix(int n, int k, int m, float a[n][k], float b[k][m], float *c[]){
-
     allocateMatrix(c, n, m);
 
     for(int i=0; i<n; i++){
@@ -124,13 +120,11 @@ void multiplyMatrix(int n, int k, int m, float a[n][k], float b[k][m], float *c[
 }
 
 void transposeMatrix(int n, int m, float a[n][m], float *c[]){
-
     allocateMatrix(c, m, n);
 
     for(int i = 0; i < n; i++){
         for(int j = 0; j < m; j++){
             c[j][i] = a[i][j];
-//            printf("i:%d\tj:%d\tvalue:%f\n", i, j, c[j][i]);
         }
     }
 }
