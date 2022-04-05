@@ -90,6 +90,7 @@ void allocateMatrix(float *a[], int n, int m){
     for(int i=0; i<n; i++){
         a[i] = ptr+(m*i);
     }
+    return;
 }
 
 void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
@@ -100,6 +101,7 @@ void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
             c[i][j] = a[i][j] + b[i][j];
         }
     }
+    return;
 }
 
 void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){
@@ -145,6 +147,7 @@ void transposeMatrix(int n, int m, float a[n][m], float *c[]){
             c[j][i] = a[i][j];
         }
     }
+    return;
 }
 
 void copyMatrix( float *x[], int n, int m, float a[n][m]){
@@ -154,6 +157,7 @@ void copyMatrix( float *x[], int n, int m, float a[n][m]){
         }
     }
     free(ptr);
+    return;
 }
 
 void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]){
@@ -183,6 +187,7 @@ void printMatrix(int r, int c, float matrix[r][c]){
         }
         printf("\n");
     }
+    return;
 }
 
 void printSep(){
@@ -198,6 +203,7 @@ void declareMatrix(int row, int column, float temp[], float a[row][column]){
             k++;
         }
     }
+    return;
 }
 
 int isInt(float x){
