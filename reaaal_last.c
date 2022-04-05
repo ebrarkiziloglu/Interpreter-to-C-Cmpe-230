@@ -153,7 +153,7 @@ int main (int argc,char *argv[]) {
 }
 
 char *separateLine(char line[], int length, bool nw){
-    if(strcat(line, "\n") == 0) return NULL;
+    if(strcmp(line, "\n") == 0) return NULL;
     static char result[256] = "";
     strcpy(result, "");
     for(int i = 0; i < length; i++) {
