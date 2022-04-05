@@ -14,6 +14,8 @@ int isInt(float x);
 void transposeMatrix(int n, int m, float a[n][m], float *c[]);
 void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);
 void printSep();
+int row = 0, column = 0, middle = 0;
+float *ptr;
 
 float A[3][3];
 float T[1][1];
@@ -21,11 +23,10 @@ float x[3][1];
 float y[3][1];
 float r;
 float i;
-float *ptr;
+
 
 int main() {
 
-    int row = 0, column = 0, middle = 0;
     float x1[(sizeof(A)/sizeof(A[0])) * (sizeof(A[0])/sizeof(A[0][0]))] = {0.5, 0, 0.5, 0, 0, 0.5, 0.5, 1, 0};
     declareMatrix(sizeof(A)/sizeof(A[0]), sizeof(A[0])/sizeof(A[0][0]), x1, A);
     float x11[(sizeof(x)/sizeof(x[0])) * (sizeof(x[0])/sizeof(x[0][0]))] = { 1, 1, 1};
