@@ -15,6 +15,7 @@ void transposeMatrix(int n, int m, float a[n][m], float *c[]);
 void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);
 void printSep();
 int row = 0, column = 0, middle = 0;
+float *ptr;
 
 int main() {
 
