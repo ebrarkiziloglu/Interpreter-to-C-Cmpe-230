@@ -9,6 +9,7 @@ void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);
 void multiplyMatrix(int n, int k, int m, float a[n][m], float b[m][k], float *c[]);
 void multiplymatrixwithscalar(float x, int n, int m, float a[n][m], float *c[]);
 void transposeMatrix(int n, int m, float a[n][m], float *c[]);
+float scalartr(float x);
 void copyMatrix( float *x[], int n, int m, float a[n][m]);
 void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);
 int choose (float x1, float x2, float x3, float x4);
@@ -21,6 +22,7 @@ float *ptr;
 
 int main() {
 
+    
     return 0;
 }
 
@@ -87,6 +89,10 @@ void transposeMatrix(int n, int m, float a[n][m], float *c[]){
         }
     }
     return;
+}
+
+float scalartr(float x){
+    return x;
 }
 
 void copyMatrix( float *x[], int n, int m, float a[n][m]){
