@@ -40,7 +40,7 @@ int main() {
         float *y0[row];
         float y1[row][column];
         multiplyMatrix(row, middle, column, A, x, y0);
-        copyMatrix(y0, 3, 1, y1);
+        copyMatrix(y0, row, column, y1);
         copyMatrixtoMatrix(row, column, y, y1);
 
         row = sizeof(y)/sizeof(y[0]);
