@@ -6,6 +6,7 @@
 - IDs list hes compilationda sıfırlanmalı
 - Bir de for un içinde i yi float olarak tanımlamışız onu da int yapalım
 - Otomatik printf kullanirken intleri de float olarak yazdırıyoruz. Bunun kontrolü gerekiyor.
+- "Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.
 - ~~factor fonksiyonunda id lerden sonra, 'str' ye type ekleyecegiz.~~
 
 // ~~Comment~~
