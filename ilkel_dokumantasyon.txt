@@ -1,0 +1,76 @@
+int main():{
+
+	reads each line until the end of the input file:
+		send the line to the function seperateLine
+		increment lineNum by 1
+with the built-in strsep function, determines tokens of the line and add them to the tokens array.
+		if a token ‘#’ exists, quits to take tokens after that point.
+		If number of tokens > 0:
+Adds ‘$’ token at the end of the tokens list (to show that the tokens are ended.)
+			Calls process function with empty str, number of tokens, and empty cexpr string
+If typeOfLine == 0:
+	Writes the Error line.
+If typeOfLine == 1:
+	Adds cexpr into executableBlock string.
+			If typeOfLine == 2:
+Adds cexpr into definitionBlock string.
+
+			
+				
+}
+
+process(char *str, int numTokens, char *res):{
+Sets str1, str2, str3, str4, str5, str6 strings to empty strings.
+Calls isAssign() function, assigns the returned value to assignment integer.
+Looks for the token ‘scalar’, ‘vector’, or ‘matrix’ in the tokens. If finds, calls defineVariable function with parameter res. And returns 2. 
+Checks whether the first token is ‘print’ or ‘printsep’ or ‘for’ or ‘}’ , respectively.
+If ‘print’:
+
+If ‘printsep’:
+
+If ‘for’:
+
+If ‘}’:
+
+Else, looks for the value of the assignment. IF it is not -1, then calls assign(numTokens, res, assignment) function.
+Else, returns 0.
+
+}
+
+assign(numTokens, res, assignment){
+	Does some things…
+	Calls factor() function for the LEFT-HAND-SIDE.
+}
+
+
+isAssign(){
+	Looks for ‘=’ token in the tokens list and returns the index of the token, if exists. Returns -1 otherwise.
+}
+
+
+defineVariable(char *str){
+	
+	sets type (write in detailed)
+	calls isValidVarName to check whether the variable’s name is valid. Return 0, if not.
+	If type is ‘vector’:
+		Adds the first dimension given and adds the second dimension [1] to the str.
+If type is ‘matrix’:
+Adds the dimensions given and returns 0 if encounters any error.
+	Adds ‘;’ to the str. 
+	Checks whether this id is defined before, with the function isID. Returns 0 if so.
+	If not, defines the corresponding ID struct and adds it to the struct array IDs.
+
+
+
+}
+
+isID(){}
+
+
+
+
+
+
+
+
+!!! note that we used sqrt in the report.
