@@ -60,7 +60,6 @@ char *separateLine(char line1[], int length, bool nw);
 int defineVariable(char *str);
 int isNumber(char s[]);
 int isID(char *s);
-char *strsep(char **stringp, const char *delim);
 int assign(int numTokens, char* res, int equalIndex);
 int process(char *str, int numTokens, char *res);
 int processStack(char str[N], char *line, char *lasttoken);
@@ -196,7 +195,6 @@ int defineVariable(char *str){
 
     char name[10];
     name[0] = '\0';
-//    static char line[100];               // line will store the C code
 
     strcpy(str, "float ");             // adding 'float ' at the beginning
     type = tokens[cur];
@@ -245,7 +243,6 @@ int defineVariable(char *str){
         row = tokens[cur];
         cur++;
         if(is_integer(row) != 0){
-            ////THIS TOKEN IS ROW
             strcat(str, row);
             if(maxDimension < atoi(row)) maxDimension = atoi(row);
         } else{
@@ -279,7 +276,6 @@ int defineVariable(char *str){
     strcat(str, ";");
     // if id already exists, then error
     if(isID(name)!=-1){
-        printf("ERROR, an id cannot be defined more than once!");
         return 0;
     }else{
         struct ID a = {.name = *name, .col= atoi(column), .row = atoi(row)};
@@ -635,11 +631,9 @@ int process(char *str, int numTokens, char *res){
             strcat(res, str3);
             strcat(res, "){\n\t");
             return 1;
-//        isForLine = false;
         }
 
         else{
-            printf("syntax error in for loop\n");
             return 0;
         }
     }
@@ -657,7 +651,6 @@ int process(char *str, int numTokens, char *res){
             strcat(res, "}\n\t");
             return 1;
         }
-        printf("more than one }");
         return 0;
     }
 
@@ -667,7 +660,6 @@ int process(char *str, int numTokens, char *res){
     }
 
     else{
-        printf("ERROR NO SUCH TYPE OF LINE\n");
         return 0;
     }
 }
@@ -852,7 +844,6 @@ int assign(int numTokens, char* res, int equalIndex){
 
             while(cur<numTokens-3){
                 if(isNumber(tokens[cur])==0){
-                    printf("ERROR NUMBER NEEDED\n");
                     return 0;
                 }
                 strcat(res, tokens[cur]);
@@ -860,13 +851,11 @@ int assign(int numTokens, char* res, int equalIndex){
                 cur++;
             }
             if(isNumber(tokens[cur])==0){
-                printf("ERROR NUMBER NEEDED\n");
                 return 0;
             }
             strcat(res, tokens[cur]);
             cur++;
             if(strcmp(tokens[cur], "}")!=0){
-                printf("ERROR NEEDED SUSLU PARANTEZ\n");
                 return 0;
             }
             strcat(res, "};\n\t");
@@ -1213,16 +1202,6 @@ int isID(char *s){
     return -1;
 }
 
-char *strsep(char **stringp, const char *delim) {
-    char *rv = *stringp;
-    if (rv) {
-        *stringp += strcspn(*stringp, delim);
-        if (**stringp)
-            *(*stringp)++ = '\0';
-        else
-            *stringp = 0; }
-    return rv;
-}
 
 int processStack(char str[N], char *line, char *lasttoken){
     memset(stack, 0, sizeof(stack));
@@ -1618,10 +1597,10 @@ int processStack(char str[N], char *line, char *lasttoken){
             typeoftokensinstack[currentindexofstack] = 0;
             strcat(stack[currentindexofstack], "");
             currentindexofstack--;
-            int idofdumbvar = adddumbVar(-7);
             if((is_integer(token1)) || (typeoftoken1 == 7 || typeoftoken1 == -7) ){
                 // scalar:
                 // float id = scalartr(token1);
+                int idofdumbvar = adddumbVar(-7);
                 strcat(line, "\n\tfloat ");
                 strcat(line, IDs[idofdumbvar].name);
                 strcat(line, " = scalartr( ");
