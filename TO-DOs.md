@@ -1,11 +1,11 @@
 
 //// TO-DOs:
 
-- Matlangde index 1 dediği aslında 0.
-- Ve for döngüsünde upper bound dediği expr2 dahil, o yüzden küçük eşit dememiz lazım
+- ~~Matlangde index 1 dediği aslında 0.
+- ~~Ve for döngüsünde upper bound dediği expr2 dahil, o yüzden küçük eşit dememiz lazım
 - IDs list hes compilationda sıfırlanmalı
-- Bir de for un içinde i yi float olarak tanımlamışız onu da int yapalım
-- Otomatik printf kullanirken intleri de float olarak yazdırıyoruz. Bunun kontrolü gerekiyor.
+- ~~Bir de for un içinde i yi float olarak tanımlamışız onu da int yapalım
+- ~~Otomatik printf kullanirken intleri de float olarak yazdırıyoruz. Bunun kontrolü gerekiyor.
 - "Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.
 - ~~factor fonksiyonunda id lerden sonra, 'str' ye type ekleyecegiz.~~
 
@@ -20,10 +20,10 @@
 &nbsp;&nbsp;&nbsp;** Scalar substraction\
 &nbsp;&nbsp;&nbsp;** Vector addition\
 &nbsp;&nbsp;&nbsp;** Vector multiplication\
-&nbsp;&nbsp;&nbsp;** Vector substraction~~\
+&nbsp;&nbsp;&nbsp;** Vector substraction\
 &nbsp;&nbsp;&nbsp;** Scalar * Vector\
 &nbsp;&nbsp;&nbsp;** Scalar * Matrix\
-~~&nbsp;&nbsp;&nbsp;** Matrix addition\
+&nbsp;&nbsp;&nbsp;** Matrix addition\
 &nbsp;&nbsp;&nbsp;** Matrix multiplication\
 &nbsp;&nbsp;&nbsp;** Matrix substraction\
 &nbsp;&nbsp;&nbsp;** transpose of Matrix\
@@ -32,9 +32,9 @@
 &nbsp;&nbsp;&nbsp;** sqrt of scalar\
 &nbsp;&nbsp;&nbsp;** choose (expr, expr, expr, expr)\
 &nbsp;&nbsp;&nbsp;** Print matrix\
-&nbsp;&nbsp;&nbsp;** Print vector~~\
+&nbsp;&nbsp;&nbsp;** Print vector\
 &nbsp;&nbsp;&nbsp;** Print scalar\
-~~&nbsp;&nbsp;&nbsp;** Printsep\
+&nbsp;&nbsp;&nbsp;** Printsep\
 &nbsp;&nbsp;&nbsp;** CopyMatrix~~\
   
 ~~6. for loop~~
@@ -51,7 +51,3 @@
   
 14. documentation + comment
  
--- 
-
-//// inside sqrt, no negative numbers!!
-//// PRINT and FOR
