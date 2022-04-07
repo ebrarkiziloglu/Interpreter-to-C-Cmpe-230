@@ -793,7 +793,6 @@ int processStack(char str[N], char *line, char *lasttoken){
     strcpy(token3, "");
     strcpy(token4, "");
     numofindexes = 0;
-//    isexprfinished = false;
     stackcur = 0;
     char *p;
     char *stacktoken;
@@ -815,7 +814,6 @@ int processStack(char str[N], char *line, char *lasttoken){
 
     strcat(line, "\t");
     while(stackcur < numstacktokens){
-        //// * is not finished yet
         if(strcmp(stacktokens[stackcur] , "*") == 0){
             stackcur++;
             if(strcmp(stacktokens[stackcur], "scalar") == 0){
