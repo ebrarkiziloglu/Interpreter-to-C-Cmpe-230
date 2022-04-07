@@ -4,14 +4,13 @@
 - ~~Matlangde index 1 dediği aslında 0.~~
 - ~~Ve for döngüsünde upper bound dediği expr2 dahil, o yüzden küçük eşit dememiz lazım~~
 - IDs list hes compilationda sıfırlanmalı
+- "Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.
+- documentation + comment
+
+
 - ~~Bir de for un içinde i yi float olarak tanımlamışız onu da int yapalım~~
 - ~~Otomatik printf kullanirken intleri de float olarak yazdırıyoruz. Bunun kontrolü gerekiyor.~~
-- "Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.
 - ~~factor fonksiyonunda id lerden sonra, 'str' ye type ekleyecegiz.~~
-
-// ~~Comment~~
-
-1. Matrix dimensions in the expr-term-factor loop will be stored. int array or string can be used\
 ~~2. During definitions, create struct and add id names into 'IDs'.~~
 ~~3. Read assingments, first token: id, second token: =, rest is: <expr>~~
 4. Functions in the file.c:\
@@ -48,6 +47,4 @@
 ~~12. read line into process~~
   
 ~~13. print(Error Line) line number~~
-  
-14. documentation + comment
  
