@@ -14,6 +14,7 @@ void copyMatrix( float *x[], int n, int m, float a[n][m]);
 void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);
 int choose (float x1, float x2, float x3, float x4);
 void printMatrix(int r, int c, float matrix[r][c]);
+void printScalar(float x);
 void printSep();
 void declareMatrix(int row, int column, float temp[], float a[row][column]);
 int isInt(float x);
@@ -133,6 +134,15 @@ void printMatrix(int r, int c, float matrix[r][c]){
         printf("\n");
     }
     return;
+}
+
+void printScalar(float x){
+    int isInteger = isInt(x);
+    if(isInteger==1){
+        printf("%d\n", (int)x);
+    }else{
+        printf("%f\n", x);
+    }
 }
 
 void printSep(){
