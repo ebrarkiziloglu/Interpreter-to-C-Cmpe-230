@@ -339,7 +339,7 @@ int process(char *str, int numTokens, char *res){
         }
         if(IDs[idCheck].type==7){
             //scalar print
-            strcat(res, "printf(\"%f\", ");
+            strcat(res, "printScalar(");
             strcat(res, IDs[idCheck].name);
             strcat(res, ");");
 
@@ -347,7 +347,7 @@ int process(char *str, int numTokens, char *res){
             //vector
             if(strcmp(tokens[cur],"[")==0){
                 cur++;
-                strcat(res, "printf(\"%f\", ");
+                strcat(res, "printScalar(");
                 strcat(res, IDs[idCheck].name);
                 strcat(res, "[");
                 strcat(res, tokens[cur]);
@@ -376,7 +376,7 @@ int process(char *str, int numTokens, char *res){
                 strcat(res, ");");
             }else if(strcmp(tokens[cur], "[")==0 && strcmp(tokens[cur+2], ",")==0){
                 cur++;
-                strcat(res, "printf(\"%f\", ");
+                strcat(res, "printScalar(");
                 strcat(res, IDs[idCheck].name);
                 strcat(res, "[");
                 strcat(res, tokens[cur]);
@@ -1914,6 +1914,7 @@ void addFunctionDeclarations(){
     strcat(funcDeclarationBlock, "void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);\n");
     strcat(funcDeclarationBlock, "int choose (float x1, float x2, float x3, float x4);\n");
     strcat(funcDeclarationBlock, "void printMatrix(int r, int c, float matrix[r][c]);\n");
+    strcat(funcDeclarationBlock, "void printScalar(float x);\n");
     strcat(funcDeclarationBlock, "void printSep();\n");
     strcat(funcDeclarationBlock, "void declareMatrix(int row, int column, float temp[], float a[row][column]);\n");
     strcat(funcDeclarationBlock, "int isInt(float x);\n");
@@ -2019,6 +2020,14 @@ void addFunctionDefinitions(){
                                 "        printf(\"\\n\");\n"
                                 "    }\n"
                                 "    return;\n"
+                                "}\n\n");
+    strcat(funcDefinitionBlock, "void printScalar(float x){\n"
+                                "    int isInteger = isInt(x);\n"
+                                "    if(isInteger==1){\n"
+                                "        printf(\"%d\\n\", (int)x);\n"
+                                "    }else{\n"
+                                "        printf(\"%f\\n\", x);\n"
+                                "    }\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "void printSep(){\n"
                                 "    printf(\"------------\\n\");\n"
