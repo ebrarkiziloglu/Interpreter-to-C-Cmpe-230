@@ -311,7 +311,8 @@ int process(char *str, int numTokens, char *res){
     int exp1val, exp2val, exp3val, exp4val, exp5val, exp6val;
 
     if(strcmp(tokens[cur], "scalar")==0 || strcmp(tokens[cur], "vector")==0 || strcmp(tokens[cur], "matrix")==0){
-        defineVariable(res);
+        int defineval = defineVariable(res);
+        if( defineval == 0 ) return 0;
         return 2;
     }
     //print line
