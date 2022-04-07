@@ -1903,7 +1903,7 @@ void addFunctionDeclarations(){
     strcat(funcDeclarationBlock, "#include <stdlib.h>\n");
     strcat(funcDeclarationBlock, "#include <string.h>\n");
     strcat(funcDeclarationBlock, "#include <math.h>\n\n");
-    strcat(funcDeclarationBlock, "void allocateMatrix(float *A[], int n, int m);\n");
+    strcat(funcDeclarationBlock, "void allocateMatrix(float *a[], int n, int m);\n");
     strcat(funcDeclarationBlock, "void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);\n");
     strcat(funcDeclarationBlock, "void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);\n");
     strcat(funcDeclarationBlock, "void multiplyMatrix(int n, int k, int m, float a[n][m], float b[m][k], float *c[]);\n");
@@ -1927,22 +1927,31 @@ void addFunctionDefinitions(){
                                 "    for(int i=0; i<n; i++){\n"
                                 "        a[i] = ptr+(m*i);\n"
                                 "    }\n"
+                                "    return;\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){\n"
+                                "    allocateMatrix(c, n, m);\n"
+                                "\n"
                                 "    for(int i=0; i<n; i++){\n"
                                 "        for(int j=0; j<m; j++){\n"
                                 "            c[i][j] = a[i][j] + b[i][j];\n"
                                 "        }\n"
                                 "    }\n"
+                                "    return;\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]){\n"
+                                "    allocateMatrix(c, n, m);\n"
+                                "\n"
                                 "    for(int i=0; i<n; i++){\n"
                                 "        for(int j=0; j<m; j++){\n"
                                 "            c[i][j] = a[i][j] - b[i][j];\n"
                                 "        }\n"
                                 "    }\n"
+                                "    return;\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "void multiplyMatrix(int n, int k, int m, float a[n][k], float b[k][m], float *c[]){\n"
+                                "    allocateMatrix(c, n, m);\n"
+                                "\n"
                                 "    for(int i=0; i<n; i++){\n"
                                 "        for(int j=0; j<m; j++){\n"
                                 "            c[i][j] = 0;\n"
@@ -1951,6 +1960,7 @@ void addFunctionDefinitions(){
                                 "            }\n"
                                 "        }\n"
                                 "    }\n"
+                                "    return;\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "void multiplymatrixwithscalar(float x, int n, int m, float a[n][m], float *c[]){\n"
                                 "    allocateMatrix(c, n, m);\n"
@@ -1963,11 +1973,13 @@ void addFunctionDefinitions(){
                                 "}\n\n");
     strcat(funcDefinitionBlock, "void transposeMatrix(int n, int m, float a[n][m], float *c[]){\n"
                                 "    allocateMatrix(c, m, n);\n"
+                                "\n"
                                 "    for(int i = 0; i < n; i++){\n"
                                 "        for(int j = 0; j < m; j++){\n"
                                 "            c[j][i] = a[i][j];\n"
                                 "        }\n"
                                 "    }\n"
+                                "    return;\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "float scalartr(float x){\n"
                                 "    return x;\n"
@@ -1978,6 +1990,8 @@ void addFunctionDefinitions(){
                                 "            a[i][j] = x[i][j];\n"
                                 "        }\n"
                                 "    }\n"
+                                "    free(ptr);\n"
+                                "    return;\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]){\n"
                                 "    for(int i = 0; i < r; i++){\n"
@@ -2004,6 +2018,7 @@ void addFunctionDefinitions(){
                                 "        }\n"
                                 "        printf(\"\\n\");\n"
                                 "    }\n"
+                                "    return;\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "void printSep(){\n"
                                 "    printf(\"------------\\n\");\n"
@@ -2017,6 +2032,7 @@ void addFunctionDefinitions(){
                                 "            k++;\n"
                                 "        }\n"
                                 "    }\n"
+                                "    return;\n"
                                 "}\n\n");
     strcat(funcDefinitionBlock, "int isInt(float x){\n"
                                 "    int n = (int)x;\n"
