@@ -9,67 +9,65 @@
 #define N  500
 #define MAXIDS 20
 
-char tokens[MAXTOKENS][TOKENLENGTH] ;
-char definitionBlock[40*N] = "";
-char executableBlock[40*N] = "";
-char funcDeclarationBlock[40*N] = "";
-char funcDefinitionBlock[40*N] = "";
-
-int cur = 0 ;
-int numtokens;
-int stackcur = 0;
-int numstacktokens = 0;
-char stacktokens[MAXTOKENS][TOKENLENGTH] ;
-char cexpr[10*N];
-int currentID = 0;
-int maxDimension = 0;
-int lineNum = 0;
-char temp_name[N];
-
-int typeoftokensinstack[MAXTOKENS];    // scalar: 7 vector: 8 matrix: 9
-char stack[MAXTOKENS][TOKENLENGTH];
-int dumbvariableid = 0;
-char dumbvariablenum[N];
-char dumbvariablename[N];
-int currentindexofstack = 0;
-char index1[TOKENLENGTH] = "";
-char index2[TOKENLENGTH] = "";
-char token1[TOKENLENGTH] = "";
-char token2[TOKENLENGTH] = "";
-char token3[TOKENLENGTH] = "";
-char token4[TOKENLENGTH] = "";
-char lasttoken[TOKENLENGTH];
-int numofindexes;
-
-bool isInForLoop1 = false;
-bool isInForLoop2 = false;
-bool isfactorscalar = false;
-bool isprevfactorscalar = false;
-bool istermscalar = false;
-bool isprevtermscalar = false;
-
+char *separateLine(char line1[], int length, bool nw);
+int process(char *str, int numTokens, char *res);
+int defineVariable(char *str);
+int assign(int numTokens, char* res, int equalIndex);
+int processStack(char str[N], char *line, char *lasttoken);
+int isAssign();
 int  expr(char *) ;
 int  term(char *) ;
 int  moreterms(char *) ;
 int  factor(char *) ;
 int  morefactors(char *) ;
 int  is_integer(char *) ;
-char *separateLine(char line1[], int length, bool nw);
-int defineVariable(char *str);
 int isNumber(char s[]);
 int isID(char *s);
-int assign(int numTokens, char* res, int equalIndex);
-int process(char *str, int numTokens, char *res);
-int processStack(char str[N], char *line, char *lasttoken);
-int isAssign();
 int findComma();
 int findColon();
-int isValidVarName(char* name);
 void editVarName(char *old, char *new);
+int isValidVarName(char* name);
 int adddumbVar(int typeofdumbvar);
-void addFunctionDeclarations();
 void addFunctionDefinitions();
+void addFunctionDeclarations();
 
+// to store and keep track of tokens from the input file:
+char tokens[MAXTOKENS][TOKENLENGTH] ;
+int numtokens;
+int cur = 0 ;
+
+// to store and keep track of tokens in the postfix form of the line taken from the input:
+char stacktokens[MAXTOKENS][TOKENLENGTH] ;
+int numstacktokens = 0;
+int stackcur = 0;
+// to store the tokens during the process of postfix form:
+int typeoftokensinstack[MAXTOKENS];    // scalar: 7 vector: 8 matrix: 9
+char stack[MAXTOKENS][TOKENLENGTH];
+int currentindexofstack = 0;
+char token1[TOKENLENGTH] = "";
+char token2[TOKENLENGTH] = "";
+char token3[TOKENLENGTH] = "";
+char token4[TOKENLENGTH] = "";
+char index1[TOKENLENGTH] = "";
+char index2[TOKENLENGTH] = "";
+int numofindexes;
+char lasttoken[TOKENLENGTH];        // At the end of postfix process, the last result token is stored here.
+                                    // Afterwards, this is assigned to the LEFT-HAND-SIDE of the assignement line from the input file.
+// to add some intermediate variables:
+int dumbvariableid = 0;
+char dumbvariablenum[N];
+char dumbvariablename[N];
+
+// to store the produced lines of expressions to be written in the output file:
+char cexpr[10*N];
+
+// to store the lines to be written in the output C file:
+char definitionBlock[40*N] = "";
+char executableBlock[40*N] = "";
+char funcDeclarationBlock[40*N] = "";
+char funcDefinitionBlock[40*N] = "";
+
+// to store and keep track of IDs defined so far:
 struct ID{
     char name[20];
     int row;        //these dimensions can be 0 for scalars
@@ -77,8 +75,22 @@ struct ID{
     //type=> scalar:7 vector:8 matrix:9 dumbscalar: -1 dumbmatrix: -2
     int type;
 };
-
 struct ID IDs[MAXIDS] ;
+int currentID = 0;
+
+int maxDimension = 0;       // to keep track of the maximum dimension defined in the input file:
+int lineNum = 0;            // to keep track of the number of line processed from the input file
+char temp_name[N];          // I DON'T KNOW what this does :D
+
+// To keep track of for loops:
+bool isInForLoop1 = false;
+bool isInForLoop2 = false;
+
+// To keep track of the type compatibility during the conversion from infix to postfix:
+bool isfactorscalar = false;
+bool isprevfactorscalar = false;
+bool istermscalar = false;
+bool isprevtermscalar = false;
 
 int main (int argc,char *argv[]) {
 
@@ -149,7 +161,6 @@ int main (int argc,char *argv[]) {
     }
 
     if(isInForLoop1==true || isInForLoop2==true){
-        printf("ERROR! DIDN'T CLOSE THE FOR LOOP\n");
         return 0;
     }
     strcat(definitionBlock, "\n");
@@ -183,119 +194,7 @@ char *separateLine(char line[], int length, bool nw){
     return result;
 }
 
-// this function is tested with the "  fgets(buff, 300, file); "  function in the main method, where buff is defined as "  char buff[300];  "
-// this function reads the variable definitions and converts them to C language.
-int defineVariable(char *str){
-//    int length = strlen(str);
-    char *type;
-    char *row = "0";
-    char *column = "0";
-
-    char name[10];
-    name[0] = '\0';
-
-    strcpy(str, "float ");             // adding 'float ' at the beginning
-    type = tokens[cur];
-    cur++;
-
-    // scalar  |  vector  |  matrix
-    strcpy(name, tokens[cur]);
-    cur++;
-    if( isValidVarName(name)==1 ){
-        strcat(str, name);
-    } else{
-        return 0;
-    }
-    if(strcmp(type, "vector") == 0){    // vector    y[4]   -->    float y[4][1];
-        column = "1";
-        if(strcmp(tokens[cur], "[") == 0){
-            strcat(str, tokens[cur]);
-            cur++;
-        } else{
-            return 0;
-        }
-        row = tokens[cur];
-        cur++;
-        if(is_integer(row) != 0){
-            strcat(str, row); ////this is row
-
-            if(maxDimension < atoi(row)) maxDimension = atoi(row);
-        } else{
-            return 0;
-        }
-        if(strcmp(tokens[cur], "]") == 0){
-            strcat(str, tokens[cur]);
-            cur++;
-        } else{
-            return 0;
-        }
-        strcat(str, "[1]");
-    }
-    else if(strcmp(type, "matrix") == 0){     // matrix    z[3,4]   -->   float x[3][4];
-        if(strcmp(tokens[cur], "[") == 0){
-            strcat(str, tokens[cur]);
-            cur++;
-        } else{
-            return 0;
-        }
-        row = tokens[cur];
-        cur++;
-        if(is_integer(row) != 0){
-            strcat(str, row);
-            if(maxDimension < atoi(row)) maxDimension = atoi(row);
-        } else{
-            return 0;
-        }
-        // token should be ','
-        if(strcmp(tokens[cur], ",") != 0){
-            return 0;
-        }
-        cur++;
-        strcat(str, "][");
-        column = tokens[cur];
-        cur++;
-        // column should be num
-        if(is_integer(column) != 0){
-            strcat(str, column);
-
-            if(maxDimension < atoi(column)) maxDimension = atoi(column);
-        } else{
-            return 0;
-        }
-        // token should be ']'
-        if(strcmp(tokens[cur], "]") == 0){
-            strcat(str, tokens[cur]);
-            cur++;
-        } else{
-            return 0;
-        }
-
-    }
-    strcat(str, ";");
-    // if id already exists, then error
-    if(isID(name)!=-1){
-        return 0;
-    }else{
-        struct ID a = {.name = *name, .col= atoi(column), .row = atoi(row)};
-        int i=1;
-        while(name[i]!='\0'){
-            a.name[i] = name[i];
-            i++;
-        }
-        if(strcmp(type, "vector")==0){
-            a.type=8;
-        }else if(strcmp(type, "matrix")==0){
-            a.type=9;
-        }else{
-            a.type=7;
-        }
-        IDs[currentID] = a;
-        currentID++;
-        return 1;
-    }
-}
-
-//// a line can be print, printsep, assignment, OR FOR
+// a line can be a definition, a print / printsep / for statements or an assignment.
 int process(char *str, int numTokens, char *res){
 
     char str1[N], str2[N], str3[N], str4[N], str5[N], str6[N];
@@ -311,8 +210,7 @@ int process(char *str, int numTokens, char *res){
     int exp1val, exp2val, exp3val, exp4val, exp5val, exp6val;
 
     if(strcmp(tokens[cur], "scalar")==0 || strcmp(tokens[cur], "vector")==0 || strcmp(tokens[cur], "matrix")==0){
-        int defineval = defineVariable(res);
-        if( defineval == 0 ) return 0;
+        if( defineVariable(res) == 0 ) return 0;
         return 2;
     }
     //print line
@@ -403,7 +301,7 @@ int process(char *str, int numTokens, char *res){
         return 1;
     }
 
-        //printsep line
+        //printsep statement:
     else if(strcmp(tokens[cur], "printsep")==0){
         cur++;
         if(strcmp(tokens[cur],"(")!=0){
@@ -418,6 +316,7 @@ int process(char *str, int numTokens, char *res){
         return 1;
     }
 
+        // for statement:
     else if(strcmp(tokens[cur], "for")==0){
         cur++;
         if(strcmp(tokens[cur],"(")!=0){
@@ -446,7 +345,7 @@ int process(char *str, int numTokens, char *res){
         }
         cur++;
 
-        ////nested for loop
+        //nested for statement:
         if(strcmp(tokens[cur],",")==0){
             cur++;
             checkId = isID(tokens[cur]);
@@ -477,32 +376,23 @@ int process(char *str, int numTokens, char *res){
             if(exp1val!=2){
                 return 0;
             }
-
             cur = colonIndex+1;
-
             colonIndex = findColon();
             sprintf(tokens[colonIndex],"$");
-
             exp2val = expr(str2);
             if(exp2val!=2){
-                printf("expr2 in for loop must be scalar\n");
                 return 0;
             }
-
             cur = colonIndex+1;
-
             commaIndex = findComma();
             if(commaIndex==-1){
-                printf("NEED COMMA\n");
                 return 0;
             }
             sprintf(tokens[commaIndex],"$");
             exp3val = expr(str3);
             if(exp3val!=2){
-                printf("expr3 in for loop must be scalar\n");
                 return 0;
             }
-
             cur = commaIndex+1;
             isInForLoop1 = true;
             strcat(res, "for(int ");
@@ -521,39 +411,32 @@ int process(char *str, int numTokens, char *res){
 
             colonIndex = findColon();
             if(colonIndex==-1){
-                printf("colon needed\n");
                 return 0;
             }
             sprintf(tokens[colonIndex],"$");
             exp4val = expr(str4);
             if(exp4val!=2){
-                printf("expr4 in for loop must be scalar\n");
                 return 0;
             }
 
             cur = colonIndex+1;
-
             colonIndex = findColon();
             if(colonIndex==-1){
-                printf("colon needed\n");
                 return 0;
             }
             sprintf(tokens[colonIndex],"$");
 
             exp5val = expr(str5);
             if(exp5val!=2){
-                printf("expr5 in for loop must be scalar\n");
                 return 0;
             }
             cur = colonIndex+1;
 
             exp6val = expr(str6);
             if(exp6val!=2){
-                printf("expr6 in for loop must be scalar\n");
                 return 0;
             }
             if (strcmp(tokens[cur], ")") != 0) {
-                printf("error needed )");
                 return 0;
             }
             cur++;
@@ -574,44 +457,38 @@ int process(char *str, int numTokens, char *res){
             return 1;
         }
 
-            ////1d for loop
+            // 1d for statement:
         else if(strcmp(tokens[cur],"in")==0){
 
             cur++;
             colonIndex = findColon();
             if (colonIndex == -1) {
-                printf("colon needed\n");
                 return 0;
             }
             sprintf(tokens[colonIndex], "$");
             exp1val = expr(str1);
             if (exp1val != 2) {
-                printf("expr1 in for loop must be scalar\n");
                 return 0;
             }
 
             cur = colonIndex + 1;
             colonIndex = findColon();
             if (colonIndex == -1) {
-                printf("colon needed\n");
                 return 0;
             }
             sprintf(tokens[colonIndex], "$");
 
             exp2val = expr(str2);
             if (exp2val != 2) {
-                printf("expr2 in for loop must be scalar\n");
                 return 0;
             }
 
             cur = colonIndex + 1;
             exp3val = expr(str3);
             if (exp3val != 2) {
-                printf("expr3 in for loop must be scalar\n");
                 return 0;
             }
             if (strcmp(tokens[cur], ")") != 0) {
-                printf("error needed )");
                 return 0;
             }
             cur++;
@@ -631,7 +508,6 @@ int process(char *str, int numTokens, char *res){
             strcat(res, "){\n\t");
             return 1;
         }
-
         else{
             return 0;
         }
@@ -653,7 +529,7 @@ int process(char *str, int numTokens, char *res){
         return 0;
     }
 
-        //assignment line
+        // assignment line
     else if(assignment!=-1){
         return assign(numTokens, res, assignment);
     }
@@ -663,111 +539,112 @@ int process(char *str, int numTokens, char *res){
     }
 }
 
-int expr(char *str)
-{
-    //printf("241 - curr:%d\n", cur);
-    char str1[N], str2[N] ;
-    int result = 1;
-    str1[0] = str2[0] = '\0' ;
-    int termvalue = term(str1);
-    int moretermvalue = moreterms(str2);
-    if (termvalue == 0 || moretermvalue == 0) {
-        return(0) ;
-    }
-    else if(moretermvalue == 1){
-        result = termvalue;
-    }
-    else if(moretermvalue == 2){
-        if(termvalue != 2) {
-            printf("incompatible types!\n");
-            return 0;
-        }
-        else result = 2;
-    }
-    if(moretermvalue == 3){
-        if(termvalue != 3) {
-            printf("incompatible types!\n");
-            return 0;
-        }
-        else result = 3;
-    }
-    strcat(str1,str2) ;
-    strcpy(str,str1) ;
-    //printf("263 - curr:%d\n", cur);
-    return(result) ;
-}
+// this function reads the variable definitions and converts them to C language.
+int defineVariable(char *str){
+    char *type;
+    char *row = "0";
+    char *column = "0";
+    char name[10];
+    name[0] = '\0';
 
-int term(char *str)
-{
-    //printf("267 - curr:%d\n", cur);
-    char str1[N], str2[N] ;
-    int result = 1;
-    str1[0] = str2[0] = '\0' ;
-    int factorvalue = factor(str1);
-    //printf("274 - curr:%d\n", cur);
-    int morefactorvalue = morefactors(str2);
-    if (factorvalue == 0 || morefactorvalue == 0) {
-        return(0) ;
+    strcpy(str, "float ");             // adding 'float ' at the beginning
+    type = tokens[cur];
+    cur++;
+    // scalar  |  vector  |  matrix
+    strcpy(name, tokens[cur]);
+    cur++;
+    if( isValidVarName(name)==1 ){
+        strcat(str, name);
+    } else{
+        return 0;
     }
-    if(morefactorvalue == 1 || morefactorvalue == 2){
-        if(factorvalue == 2) istermscalar = true;
-        if(factorvalue == 3) istermscalar = false;
-        result = factorvalue;
-    }
-    if(morefactorvalue == 3){
-        istermscalar = false;
-        result = morefactorvalue;
-    }
-    strcat(str1,str2) ;
-    strcpy(str,str1) ;
-    return(result) ;
-}
-
-int moreterms(char *str){
-    char str1[N], str2[N], str3[N] ;
-    int result = 1;
-    str1[0] = str2[0] = str3[0] = '\0' ;
-    char func[N] ;
-    func[0] = '\0' ;
-    //printf("291 - curr:%d\n", cur);
-    if ( (strcmp(tokens[cur],"+") == 0 ) || (strcmp(tokens[cur],"-") == 0 ) ) {
-        isprevtermscalar = istermscalar;
-        strcpy(func,tokens[cur]) ;
-        cur++ ;
-        int termvalue =  term(str2);
-        if(isprevtermscalar && istermscalar){
-            strcpy(str1, " ") ;
-            strcat(str1, func);
-            strcat(str1, "scalar ");
-        } else if(!isprevfactorscalar && !isfactorscalar){
-            strcpy(str1, " ") ;
-            strcat(str1, func);
-            strcat(str1, "matrix ");
+    if(strcmp(type, "vector") == 0){    // vector    y[4]   -->    float y[4][1];
+        column = "1";
+        if(strcmp(tokens[cur], "[") == 0){
+            strcat(str, tokens[cur]);
+            cur++;
         } else{
-            printf("incompatible types\n");
+            return 0;
         }
-        isprevtermscalar = istermscalar;
-        int moretermvalue = moreterms(str3);
-        if (termvalue == 0 || moretermvalue == 0) {
-            return(0) ;
+        row = tokens[cur];
+        cur++;
+        if(is_integer(row) != 0){
+            strcat(str, row); ////this is row
+
+            if(maxDimension < atoi(row)) maxDimension = atoi(row);
+        } else{
+            return 0;
         }
-        else if(moretermvalue == 1){
-            result = termvalue;
+        if(strcmp(tokens[cur], "]") == 0){
+            strcat(str, tokens[cur]);
+            cur++;
+        } else{
+            return 0;
         }
-        else if(moretermvalue == 2){
-            if(termvalue != 2) result = 0;
-            else result = 2;
+        strcat(str, "[1]");
+    }
+    else if(strcmp(type, "matrix") == 0){     // matrix    z[3,4]   -->   float x[3][4];
+        if(strcmp(tokens[cur], "[") == 0){
+            strcat(str, tokens[cur]);
+            cur++;
+        } else{
+            return 0;
         }
-        if(moretermvalue == 3){
-            if(termvalue != 3) return 0;
-            else result = 3;
+        row = tokens[cur];
+        cur++;
+        if(is_integer(row) != 0){
+            strcat(str, row);
+            if(maxDimension < atoi(row)) maxDimension = atoi(row);
+        } else{
+            return 0;
+        }
+        // token should be ','
+        if(strcmp(tokens[cur], ",") != 0){
+            return 0;
+        }
+        cur++;
+        strcat(str, "][");
+        column = tokens[cur];
+        cur++;
+        // column should be num
+        if(is_integer(column) != 0){
+            strcat(str, column);
+            if(maxDimension < atoi(column)) maxDimension = atoi(column);
+        } else{
+            return 0;
+        }
+        // token should be ']'
+        if(strcmp(tokens[cur], "]") == 0){
+            strcat(str, tokens[cur]);
+            cur++;
+        } else{
+            return 0;
         }
     }
-    // str1: operator,   str2: term,   str3: moreterms
-    strcat(str2,str3) ;
-    strcat(str2,str1) ;
-    strcpy(str,str2) ;
-    return(result) ;
+    strcat(str, ";");
+
+    if(isID(name)!=-1){
+        // if id already exists, then error
+        return 0;
+    }else{
+        // if id does not exist, create the relative struct and add it to IDs array
+        struct ID a = {.name = *name, .col= atoi(column), .row = atoi(row)};
+        int i=1;
+        while(name[i]!='\0'){
+            a.name[i] = name[i];
+            i++;
+        }
+        if(strcmp(type, "vector")==0){
+            a.type=8;
+        }else if(strcmp(type, "matrix")==0){
+            a.type=9;
+        }else{
+            a.type=7;
+        }
+        IDs[currentID] = a;
+        currentID++;
+        return 1;
+    }
 }
 
 int assign(int numTokens, char* res, int equalIndex){
@@ -790,7 +667,6 @@ int assign(int numTokens, char* res, int equalIndex){
     int exprvalue;
 
     if(factorvalue==0){
-        printf("ERROR!\n");
         return 0;
     }
     if(factorvalue == 2){
@@ -810,11 +686,10 @@ int assign(int numTokens, char* res, int equalIndex){
             return 1;
         }
         if(exprvalue != 2){
-            printf("ERROR\n");
             return 0;
         }
-    }else if(factorvalue == 3){
-
+    }
+    else if(factorvalue == 3){
         int IDno = isID(tokens[0]);
 
         //if token is {
@@ -831,8 +706,7 @@ int assign(int numTokens, char* res, int equalIndex){
             while(isID(temp_name)!=-1){
                 strcat(temp_name, "_");
             }
-            /*           editVarName(str1, editVar);
-                       strcat(res, editVar);*/
+
             strcat(res, "float ");
             strcat(res, temp_name);
             strcat(res, "[");
@@ -875,7 +749,6 @@ int assign(int numTokens, char* res, int equalIndex){
         }
         exprvalue = expr(str2);
         if(exprvalue != 3){
-            printf("ERROR!\n");
             return 0;
         }
     }
@@ -912,295 +785,6 @@ int assign(int numTokens, char* res, int equalIndex){
     else if(isInForLoop1) strcat(res, "\t\t");
     return 1;
 }
-
-int factor(char *str)
-{
-    char str1[N] ;
-    int result = 1;
-    str1[0] = '\0' ;
-    if ( is_integer(tokens[cur])  ) {
-        strcpy(str,tokens[cur]) ;
-        strcat(str," ") ;
-        cur++ ;
-        // scalar:
-        isfactorscalar = true;
-        return(2) ;
-    }
-    // (expr) :
-    if ( strcmp(tokens[cur],"(") == 0 ) {
-        cur++ ;
-        int exprvalue = expr(str1);
-        if ( exprvalue == 0 || exprvalue == 1) {
-            return(0) ;
-        }
-        if ( strcmp(tokens[cur],")") != 0 ) {
-            return(0) ;
-        }
-        cur++ ;
-        strcpy(str,str1) ;
-        if(exprvalue == 2) isfactorscalar = true;
-        if(exprvalue == 3) isfactorscalar = false;
-        return(exprvalue) ;
-    }
-    //// From this point on, I added the parts for 'tr', 'choose' and 'sqrt'
-    //// the parts for ( id | id[expr] | id[expr, expr] ) are left
-    if( strcmp(tokens[cur],"tr") == 0 ){
-        cur++;
-        if ( strcmp(tokens[cur],"(") != 0 ) {
-            return(0) ;
-        }
-        cur++;
-        int exprvalue = expr(str1);
-        if ( exprvalue == 0 || exprvalue == 1) {
-            return(0) ;
-        }
-        if ( strcmp(tokens[cur],")") != 0 ) {
-            return(0) ;
-        }
-        cur++;
-        //// For now, I added the tokens in infix order for these functions, could be changed later.
-        strcat(str, str1);
-        strcat(str, " tr ");
-        if(exprvalue == 2) isfactorscalar = true;
-        if(exprvalue == 3) isfactorscalar = false;
-        return (exprvalue);
-    }
-    if( strcmp(tokens[cur],"sqrt") == 0 ){
-        cur++;
-        if ( strcmp(tokens[cur],"(") != 0 ) {
-            return(0) ;
-        }
-        cur++;
-        int exprvalue = expr(str1);
-        if ( exprvalue == 0 || exprvalue == 3 || exprvalue == 1) {
-            return(0) ;
-        }
-        if ( strcmp(tokens[cur],")") != 0 ) {
-            return(0) ;
-        }
-        cur++;
-        //// For now, I added the tokens in infix order for these functions, could be changed later.
-        strcat(str, str1);
-        strcat(str, " sqrt ");
-        if(exprvalue == 2) isfactorscalar = true;
-        return (exprvalue);
-    }
-    if( strcmp(tokens[cur],"choose") == 0 ){
-        // syntax:      choose(expr1,expr2,expr3,expr4)
-        char str2[N], str3[N], str4[N] ;
-        str2[0] = str3[0] = str4[0] = '\0' ;
-        cur++;
-        if ( strcmp(tokens[cur],"(") != 0) {
-            return(0) ;
-        }
-        cur++;
-        // expr1:
-        int expr1value = expr(str1);
-        if ( expr1value != 2 ) {
-            return(0) ;
-        }
-        if ( strcmp(tokens[cur],",") != 0 ) {
-            return(0) ;
-        }
-        cur++;
-        // expr2:
-        int expr2value = expr(str2);
-        if ( expr2value != 2 ) {
-            return(0) ;
-        }
-        if ( strcmp(tokens[cur],",") != 0 ) {
-            return(0) ;
-        }
-        cur++;
-        // expr3:
-        int expr3value = expr(str3);
-        if ( expr3value != 2 ) {
-            return(0) ;
-        }
-        if ( strcmp(tokens[cur],",") != 0 ) {
-            return(0) ;
-        }
-        cur++;
-        // expr4:
-        int expr4value = expr(str4);
-        if ( expr4value != 2 ) {
-            return(0) ;
-        }
-        if ( strcmp(tokens[cur],")") != 0 ) {
-            return(0) ;
-        }
-        cur++;
-        strcat(str, str1);
-        strcat(str, " ");
-        strcat(str, str2);
-        strcat(str, " ");
-        strcat(str, str3);
-        strcat(str, " ");
-        strcat(str, str4);
-        strcat(str, " choose ");
-        isfactorscalar = true;
-        return (2);
-    }
-
-    char idname[N];
-    idname[0] = '\0' ;
-    // adding to the str as <id>exp[]exp[] or <id>exp[] if vector
-    int check = isID(tokens[cur]);
-    if(check==-1){
-        printf("ERROR: undefined id");
-        return 0;
-
-    }else if(IDs[check].type==7){
-        //variable is a scalar
-        strcat(str, tokens[cur]);
-        strcat(str, " ");
-        cur++;
-        isfactorscalar = true;
-        return 2;
-
-    }else if(IDs[check].type==8){
-        //variable is a vector
-        strcpy(idname, tokens[cur]);
-        cur++;
-        if(strcmp(tokens[cur], "[") != 0) {
-            strcat(str, idname);
-            strcat(str, " ");
-            isfactorscalar = false;
-            return 3;
-        }
-        cur++;
-        int expr1value = expr(str1);
-        if( expr1value != 2){
-            return 0;
-        }
-        if(strcmp(tokens[cur], "]")!=0){
-            return 0;
-        }
-        cur++;
-        strcat(str, str1);
-        strcat(str, " [] ");
-        strcat(str, idname);
-        strcat(str, " ");
-        isfactorscalar = true;
-        return 2;
-
-    }
-    else{
-        //variable is a matrix
-        strcpy(idname, tokens[cur]);
-        strcat(idname, " ");
-        cur++;
-        char str2[N];
-        str2[0] = '\0' ;
-
-        if(strcmp(tokens[cur],"[")!=0){
-            strcat(str, idname);
-            isfactorscalar = false;
-            return 3;
-        }
-        cur++;
-        int expr1value = expr(str1);
-        if(expr1value != 2){
-            return 0;
-        }
-        if(strcmp(tokens[cur],",")!=0){
-            // id[expr] but points to a vector: not valid
-            return 0;
-        }
-        cur++;
-        int expr2value = expr(str2);
-        if(expr2value != 2){
-            return 0;
-        }
-        if(strcmp(tokens[cur],"]")!=0){
-            return 0;
-        }
-        cur++;
-        strcat(str, str1);
-        strcat(str, " [] ");
-        strcat(str, str2);
-        strcat(str, " [] ");
-        strcat(str, idname);
-        strcat(str, " ");
-        isfactorscalar = true;
-        return 2;
-    }
-    return(0) ;
-}
-
-int morefactors(char *str)
-{
-    char str1[N], str2[N], str3[N] ;
-    int result = 1;
-    str1[0] = str2[0] = str3[0] = '\0' ;
-    if ( (strcmp(tokens[cur],"*") == 0 ) /*|| (strcmp(tokens[cur],"/") == 0 )*/ ) {
-        isprevfactorscalar = isfactorscalar;
-//        strcpy(str1,tokens[cur]) ;
-//        strcat(str1," ") ;
-        cur++ ;
-        int factorvalue = factor(str2);
-        if(isprevfactorscalar && isfactorscalar){
-            strcpy(str1, " *scalar ") ;
-        } else if(isprevfactorscalar && !isfactorscalar){
-            strcpy(str1, " *scalarmatrix ") ;
-        } else if(!isprevfactorscalar && isfactorscalar){
-            strcpy(str1, " *matrixscalar ") ;
-        } else if(!isprevfactorscalar && !isfactorscalar){
-            strcpy(str1, " *matrix ") ;
-        }
-        isprevfactorscalar = isfactorscalar;
-        int morefactorvalue = morefactors(str3);
-        if (factorvalue == 0 || morefactorvalue == 0) {
-            result = 0;
-        }
-        else if(morefactorvalue == 1 || morefactorvalue == 2){
-            result = factorvalue;
-        }
-        else if(morefactorvalue == 3){
-            result = morefactorvalue;
-        }
-    }
-    // str1: operator,   str2: factor,   str3: morefactors
-    strcat(str2,str3) ;
-    strcat(str2,str1) ;
-    strcpy(str,str2) ;
-    return(result) ;
-}
-
-int is_integer(char *token){
-    int isnumber = 1 ;
-    char *q ;
-
-    for(q = token ; *q != '\0' ; q++) {
-        isnumber = isnumber && isdigit(*q) ;
-    }
-    return(isnumber) ;
-}
-
-int isNumber(char s[]){
-    char *ptr = s;
-    int numDots = 0;
-    for (int i = 0; s[i]!= '\0'; i++){
-        if(ptr[i]== '.'){
-            numDots++;
-        }else if (isdigit(s[i]) == 0)
-            return 0;
-    }
-    if(numDots>1){
-        return 0;
-    }
-    return 1;
-}
-
-int isID(char *s){
-
-    for(int i=0; i<MAXIDS; i++){
-        if(strcmp(s, IDs[i].name)==0)
-            return i;
-    }
-    return -1;
-}
-
 
 int processStack(char str[N], char *line, char *lasttoken){
     memset(stack, 0, sizeof(stack));
@@ -1648,7 +1232,7 @@ int processStack(char str[N], char *line, char *lasttoken){
 
             }
             else{
-                printf("WHY ARE WE HERE?? what is wrong?\n");
+                return 0;
             }
         }
         else if(strcmp(stacktokens[stackcur], "choose") == 0){
@@ -1791,11 +1375,387 @@ int isAssign(){
     return -1;
 }
 
-int findColon(){
-    for(int i=cur; i<numtokens; i++){
-        if(strcmp(tokens[i], ":")==0){
-            return i;
+int expr(char *str)
+{
+    char str1[N], str2[N] ;
+    int result = 1;
+    str1[0] = str2[0] = '\0' ;
+    int termvalue = term(str1);
+    int moretermvalue = moreterms(str2);
+    if (termvalue == 0 || moretermvalue == 0) {
+        return(0) ;
+    }
+    else if(moretermvalue == 1){
+        result = termvalue;
+    }
+    else if(moretermvalue == 2){
+        if(termvalue != 2) {
+            return 0;
         }
+        else result = 2;
+    }
+    if(moretermvalue == 3){
+        if(termvalue != 3) {
+            return 0;
+        }
+        else result = 3;
+    }
+    strcat(str1,str2) ;
+    strcpy(str,str1) ;
+    return(result) ;
+}
+
+int term(char *str)
+{
+
+    char str1[N], str2[N] ;
+    int result = 1;
+    str1[0] = str2[0] = '\0' ;
+    int factorvalue = factor(str1);
+    int morefactorvalue = morefactors(str2);
+    if (factorvalue == 0 || morefactorvalue == 0) {
+        return(0) ;
+    }
+    if(morefactorvalue == 1 || morefactorvalue == 2){
+        if(factorvalue == 2) istermscalar = true;
+        if(factorvalue == 3) istermscalar = false;
+        result = factorvalue;
+    }
+    if(morefactorvalue == 3){
+        istermscalar = false;
+        result = morefactorvalue;
+    }
+    strcat(str1,str2) ;
+    strcpy(str,str1) ;
+    return(result) ;
+}
+
+int moreterms(char *str){
+    char str1[N], str2[N], str3[N] ;
+    int result = 1;
+    str1[0] = str2[0] = str3[0] = '\0' ;
+    char func[N] ;
+    func[0] = '\0' ;
+
+    if ( (strcmp(tokens[cur],"+") == 0 ) || (strcmp(tokens[cur],"-") == 0 ) ) {
+        isprevtermscalar = istermscalar;
+        strcpy(func,tokens[cur]) ;
+        cur++ ;
+        int termvalue =  term(str2);
+        if(isprevtermscalar && istermscalar){
+            strcpy(str1, " ") ;
+            strcat(str1, func);
+            strcat(str1, "scalar ");
+        } else if(!isprevfactorscalar && !isfactorscalar){
+            strcpy(str1, " ") ;
+            strcat(str1, func);
+            strcat(str1, "matrix ");
+        } else{
+            return 0;
+        }
+        isprevtermscalar = istermscalar;
+        int moretermvalue = moreterms(str3);
+        if (termvalue == 0 || moretermvalue == 0) {
+            return(0) ;
+        }
+        else if(moretermvalue == 1){
+            result = termvalue;
+        }
+        else if(moretermvalue == 2){
+            if(termvalue != 2) result = 0;
+            else result = 2;
+        }
+        if(moretermvalue == 3){
+            if(termvalue != 3) return 0;
+            else result = 3;
+        }
+    }
+    // str1: operator,   str2: term,   str3: moreterms
+    strcat(str2,str3) ;
+    strcat(str2,str1) ;
+    strcpy(str,str2) ;
+    return(result) ;
+}
+
+int factor(char *str)
+{
+    char str1[N] ;
+    int result = 1;
+    str1[0] = '\0' ;
+    if ( is_integer(tokens[cur])  ) {
+        strcpy(str,tokens[cur]) ;
+        strcat(str," ") ;
+        cur++ ;
+        // scalar:
+        isfactorscalar = true;
+        return(2) ;
+    }
+    // (expr) :
+    if ( strcmp(tokens[cur],"(") == 0 ) {
+        cur++ ;
+        int exprvalue = expr(str1);
+        if ( exprvalue == 0 || exprvalue == 1) {
+            return(0) ;
+        }
+        if ( strcmp(tokens[cur],")") != 0 ) {
+            return(0) ;
+        }
+        cur++ ;
+        strcpy(str,str1) ;
+        if(exprvalue == 2) isfactorscalar = true;
+        if(exprvalue == 3) isfactorscalar = false;
+        return(exprvalue) ;
+    }
+
+    if( strcmp(tokens[cur],"tr") == 0 ){
+        cur++;
+        if ( strcmp(tokens[cur],"(") != 0 ) {
+            return(0) ;
+        }
+        cur++;
+        int exprvalue = expr(str1);
+        if ( exprvalue == 0 || exprvalue == 1) {
+            return(0) ;
+        }
+        if ( strcmp(tokens[cur],")") != 0 ) {
+            return(0) ;
+        }
+        cur++;
+        strcat(str, str1);
+        strcat(str, " tr ");
+        if(exprvalue == 2) isfactorscalar = true;
+        if(exprvalue == 3) isfactorscalar = false;
+        return (exprvalue);
+    }
+    if( strcmp(tokens[cur],"sqrt") == 0 ){
+        cur++;
+        if ( strcmp(tokens[cur],"(") != 0 ) {
+            return(0) ;
+        }
+        cur++;
+        int exprvalue = expr(str1);
+        if ( exprvalue == 0 || exprvalue == 3 || exprvalue == 1) {
+            return(0) ;
+        }
+        if ( strcmp(tokens[cur],")") != 0 ) {
+            return(0) ;
+        }
+        cur++;
+        strcat(str, str1);
+        strcat(str, " sqrt ");
+        if(exprvalue == 2) isfactorscalar = true;
+        return (exprvalue);
+    }
+    if( strcmp(tokens[cur],"choose") == 0 ){
+        // syntax:      choose(expr1,expr2,expr3,expr4)
+        char str2[N], str3[N], str4[N] ;
+        str2[0] = str3[0] = str4[0] = '\0' ;
+        cur++;
+        if ( strcmp(tokens[cur],"(") != 0) {
+            return(0) ;
+        }
+        cur++;
+        // expr1:
+        int expr1value = expr(str1);
+        if ( expr1value != 2 ) {
+            return(0) ;
+        }
+        if ( strcmp(tokens[cur],",") != 0 ) {
+            return(0) ;
+        }
+        cur++;
+        // expr2:
+        int expr2value = expr(str2);
+        if ( expr2value != 2 ) {
+            return(0) ;
+        }
+        if ( strcmp(tokens[cur],",") != 0 ) {
+            return(0) ;
+        }
+        cur++;
+        // expr3:
+        int expr3value = expr(str3);
+        if ( expr3value != 2 ) {
+            return(0) ;
+        }
+        if ( strcmp(tokens[cur],",") != 0 ) {
+            return(0) ;
+        }
+        cur++;
+        // expr4:
+        int expr4value = expr(str4);
+        if ( expr4value != 2 ) {
+            return(0) ;
+        }
+        if ( strcmp(tokens[cur],")") != 0 ) {
+            return(0) ;
+        }
+        cur++;
+        strcat(str, str1);
+        strcat(str, " ");
+        strcat(str, str2);
+        strcat(str, " ");
+        strcat(str, str3);
+        strcat(str, " ");
+        strcat(str, str4);
+        strcat(str, " choose ");
+        isfactorscalar = true;
+        return (2);
+    }
+
+    char idname[N];
+    idname[0] = '\0' ;
+    // adding to the str as <id>exp[]exp[] or <id>exp[] if vector
+    int check = isID(tokens[cur]);
+    if(check==-1){
+        return 0;
+
+    }else if(IDs[check].type==7){
+        //variable is a scalar
+        strcat(str, tokens[cur]);
+        strcat(str, " ");
+        cur++;
+        isfactorscalar = true;
+        return 2;
+
+    }else if(IDs[check].type==8){
+        //variable is a vector
+        strcpy(idname, tokens[cur]);
+        cur++;
+        if(strcmp(tokens[cur], "[") != 0) {
+            strcat(str, idname);
+            strcat(str, " ");
+            isfactorscalar = false;
+            return 3;
+        }
+        cur++;
+        int expr1value = expr(str1);
+        if( expr1value != 2){
+            return 0;
+        }
+        if(strcmp(tokens[cur], "]")!=0){
+            return 0;
+        }
+        cur++;
+        strcat(str, str1);
+        strcat(str, " [] ");
+        strcat(str, idname);
+        strcat(str, " ");
+        isfactorscalar = true;
+        return 2;
+
+    }
+    else{
+        //variable is a matrix
+        strcpy(idname, tokens[cur]);
+        strcat(idname, " ");
+        cur++;
+        char str2[N];
+        str2[0] = '\0' ;
+
+        if(strcmp(tokens[cur],"[")!=0){
+            strcat(str, idname);
+            isfactorscalar = false;
+            return 3;
+        }
+        cur++;
+        int expr1value = expr(str1);
+        if(expr1value != 2){
+            return 0;
+        }
+        if(strcmp(tokens[cur],",")!=0){
+            // id[expr] but points to a vector: not valid
+            return 0;
+        }
+        cur++;
+        int expr2value = expr(str2);
+        if(expr2value != 2){
+            return 0;
+        }
+        if(strcmp(tokens[cur],"]")!=0){
+            return 0;
+        }
+        cur++;
+        strcat(str, str1);
+        strcat(str, " [] ");
+        strcat(str, str2);
+        strcat(str, " [] ");
+        strcat(str, idname);
+        strcat(str, " ");
+        isfactorscalar = true;
+        return 2;
+    }
+    return(0) ;
+}
+
+int morefactors(char *str)
+{
+    char str1[N], str2[N], str3[N] ;
+    int result = 1;
+    str1[0] = str2[0] = str3[0] = '\0' ;
+    if ( strcmp(tokens[cur],"*") == 0 ) {
+        isprevfactorscalar = isfactorscalar;
+
+        cur++ ;
+        int factorvalue = factor(str2);
+        if(isprevfactorscalar && isfactorscalar){
+            strcpy(str1, " *scalar ") ;
+        } else if(isprevfactorscalar && !isfactorscalar){
+            strcpy(str1, " *scalarmatrix ") ;
+        } else if(!isprevfactorscalar && isfactorscalar){
+            strcpy(str1, " *matrixscalar ") ;
+        } else if(!isprevfactorscalar && !isfactorscalar){
+            strcpy(str1, " *matrix ") ;
+        }
+        isprevfactorscalar = isfactorscalar;
+        int morefactorvalue = morefactors(str3);
+        if (factorvalue == 0 || morefactorvalue == 0) {
+            result = 0;
+        }
+        else if(morefactorvalue == 1 || morefactorvalue == 2){
+            result = factorvalue;
+        }
+        else if(morefactorvalue == 3){
+            result = morefactorvalue;
+        }
+    }
+    // str1: operator,   str2: factor,   str3: morefactors
+    strcat(str2,str3) ;
+    strcat(str2,str1) ;
+    strcpy(str,str2) ;
+    return(result) ;
+}
+
+int is_integer(char *token){
+    int isnumber = 1 ;
+    char *q ;
+
+    for(q = token ; *q != '\0' ; q++) {
+        isnumber = isnumber && isdigit(*q) ;
+    }
+    return(isnumber) ;
+}
+
+int isNumber(char s[]){
+    char *ptr = s;
+    int numDots = 0;
+    for (int i = 0; s[i]!= '\0'; i++){
+        if(ptr[i]== '.'){
+            numDots++;
+        }else if (isdigit(s[i]) == 0)
+            return 0;
+    }
+    if(numDots>1){
+        return 0;
+    }
+    return 1;
+}
+
+int isID(char *s){
+
+    for(int i=0; i<MAXIDS; i++){
+        if(strcmp(s, IDs[i].name)==0)
+            return i;
     }
     return -1;
 }
@@ -1803,6 +1763,15 @@ int findColon(){
 int findComma(){
     for(int i=cur; i<numtokens; i++){
         if(strcmp(tokens[i], ",")==0){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int findColon(){
+    for(int i=cur; i<numtokens; i++){
+        if(strcmp(tokens[i], ":")==0){
             return i;
         }
     }
@@ -1875,30 +1844,6 @@ int adddumbVar(int typeofdumbvar){
     IDs[currentID] = a;
     currentID++;
     return (currentID-1);
-}
-
-void addFunctionDeclarations(){
-    strcat(funcDeclarationBlock, "#include <stdio.h>\n");
-    strcat(funcDeclarationBlock, "#include <stdlib.h>\n");
-    strcat(funcDeclarationBlock, "#include <string.h>\n");
-    strcat(funcDeclarationBlock, "#include <math.h>\n\n");
-    strcat(funcDeclarationBlock, "void allocateMatrix(float *a[], int n, int m);\n");
-    strcat(funcDeclarationBlock, "void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);\n");
-    strcat(funcDeclarationBlock, "void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);\n");
-    strcat(funcDeclarationBlock, "void multiplyMatrix(int n, int k, int m, float a[n][m], float b[m][k], float *c[]);\n");
-    strcat(funcDeclarationBlock, "void multiplymatrixwithscalar(float x, int n, int m, float a[n][m], float *c[]);\n");
-    strcat(funcDeclarationBlock, "void transposeMatrix(int n, int m, float a[n][m], float *c[]);\n");
-    strcat(funcDeclarationBlock, "float scalartr(float x);\n");
-    strcat(funcDeclarationBlock, "void copyMatrix( float *x[], int n, int m, float a[n][m]);\n");
-    strcat(funcDeclarationBlock, "void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);\n");
-    strcat(funcDeclarationBlock, "int choose (float x1, float x2, float x3, float x4);\n");
-    strcat(funcDeclarationBlock, "void printMatrix(int r, int c, float matrix[r][c]);\n");
-    strcat(funcDeclarationBlock, "void printScalar(float x);\n");
-    strcat(funcDeclarationBlock, "void printSep();\n");
-    strcat(funcDeclarationBlock, "void declareMatrix(int row, int column, float temp[], float a[row][column]);\n");
-    strcat(funcDeclarationBlock, "int isInt(float x);\n");
-    strcat(funcDeclarationBlock, "int row = 0, column = 0, middle = 0;\n");
-    strcat(funcDeclarationBlock, "float *ptr;\n\n");
 }
 
 void addFunctionDefinitions(){
@@ -2030,3 +1975,28 @@ void addFunctionDefinitions(){
                                 "    return 1;\n"
                                 "}\n\n");
 }
+
+void addFunctionDeclarations(){
+    strcat(funcDeclarationBlock, "#include <stdio.h>\n");
+    strcat(funcDeclarationBlock, "#include <stdlib.h>\n");
+    strcat(funcDeclarationBlock, "#include <string.h>\n");
+    strcat(funcDeclarationBlock, "#include <math.h>\n\n");
+    strcat(funcDeclarationBlock, "void allocateMatrix(float *a[], int n, int m);\n");
+    strcat(funcDeclarationBlock, "void addMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);\n");
+    strcat(funcDeclarationBlock, "void subtractMatrix(int n, int m, float a[n][m], float b[n][m], float *c[]);\n");
+    strcat(funcDeclarationBlock, "void multiplyMatrix(int n, int k, int m, float a[n][m], float b[m][k], float *c[]);\n");
+    strcat(funcDeclarationBlock, "void multiplymatrixwithscalar(float x, int n, int m, float a[n][m], float *c[]);\n");
+    strcat(funcDeclarationBlock, "void transposeMatrix(int n, int m, float a[n][m], float *c[]);\n");
+    strcat(funcDeclarationBlock, "float scalartr(float x);\n");
+    strcat(funcDeclarationBlock, "void copyMatrix( float *x[], int n, int m, float a[n][m]);\n");
+    strcat(funcDeclarationBlock, "void copyMatrixtoMatrix(int r, int c, float a[r][c], float b[r][c]);\n");
+    strcat(funcDeclarationBlock, "int choose (float x1, float x2, float x3, float x4);\n");
+    strcat(funcDeclarationBlock, "void printMatrix(int r, int c, float matrix[r][c]);\n");
+    strcat(funcDeclarationBlock, "void printScalar(float x);\n");
+    strcat(funcDeclarationBlock, "void printSep();\n");
+    strcat(funcDeclarationBlock, "void declareMatrix(int row, int column, float temp[], float a[row][column]);\n");
+    strcat(funcDeclarationBlock, "int isInt(float x);\n");
+    strcat(funcDeclarationBlock, "int row = 0, column = 0, middle = 0;\n");
+    strcat(funcDeclarationBlock, "float *ptr;\n\n");
+}
+
