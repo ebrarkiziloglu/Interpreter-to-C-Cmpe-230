@@ -516,7 +516,7 @@ int process(char *str, int numTokens, char *res){
             strcat(res, str1);
             strcat(res, "; ");
             strcat(res, forVarName1);
-            strcat(res, "<");
+            strcat(res, "<=");
             strcat(res, str2);
             strcat(res, "; ");
             strcat(res, forVarName1);
@@ -569,7 +569,7 @@ int process(char *str, int numTokens, char *res){
             strcat(res, str4);
             strcat(res, "; ");
             strcat(res, forVarName2);
-            strcat(res, "<");
+            strcat(res, "<=");
             strcat(res, str5);
             strcat(res, "; ");
             strcat(res, forVarName2);
@@ -627,7 +627,7 @@ int process(char *str, int numTokens, char *res){
             strcat(res, str1);
             strcat(res, "; ");
             strcat(res, forVarName1);
-            strcat(res, "<");
+            strcat(res, "<=");
             strcat(res, str2);
             strcat(res, "; ");
             strcat(res, forVarName1);
