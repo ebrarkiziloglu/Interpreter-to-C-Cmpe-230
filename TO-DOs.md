@@ -4,6 +4,7 @@
 - IDs list hes compilationda sıfırlanmalı
 - "Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.
 - documentation + comment
+- Hocadan caldığımız kodu bir tık özelleştirebiliriz
 
 - ~~Matlangde index 1 dediği aslında 0.~~
 - ~~Ve for döngüsünde upper bound dediği expr2 dahil, o yüzden küçük eşit dememiz lazım~~
