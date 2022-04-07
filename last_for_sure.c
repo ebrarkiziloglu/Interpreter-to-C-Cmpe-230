@@ -7,7 +7,7 @@
 #define MAXTOKENS   100
 #define TOKENLENGTH 20
 #define N  500
-#define MAXIDS 10
+#define MAXIDS 20
 
 char tokens[MAXTOKENS][TOKENLENGTH] ;
 char definitionBlock[40*N] = "";
