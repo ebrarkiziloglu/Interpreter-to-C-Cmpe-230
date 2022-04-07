@@ -24,7 +24,6 @@ char cexpr[10*N];
 int currentID = 0;
 int maxDimension = 0;
 int lineNum = 0;
-int temp_num = 0;
 char temp_name[N];
 
 int typeoftokensinstack[MAXTOKENS];    // scalar: 7 vector: 8 matrix: 9
@@ -39,7 +38,6 @@ char token1[TOKENLENGTH] = "";
 char token2[TOKENLENGTH] = "";
 char token3[TOKENLENGTH] = "";
 char token4[TOKENLENGTH] = "";
-char processedline[5*N];
 char lasttoken[TOKENLENGTH];
 int numofindexes;
 
@@ -1773,11 +1771,12 @@ int processStack(char str[N], char *line, char *lasttoken){
                     numofindexes = 0;
                 }
             }
-            else { return 0;}
+            else {
+                return 0;}
         }
         stackcur++;
     }
-//    printf("%s\n", line);
+
     strcpy(lasttoken, stack[currentindexofstack]);
     return 1;
 }
