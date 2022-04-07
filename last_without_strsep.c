@@ -35,7 +35,6 @@ void addFunctionDeclarations();
 char tokens[MAXTOKENS][TOKENLENGTH] ;
 int numtokens;
 int cur = 0 ;
-
 // to store and keep track of tokens in the postfix form of the line taken from the input:
 char stacktokens[MAXTOKENS][TOKENLENGTH] ;
 int numstacktokens = 0;
@@ -57,7 +56,6 @@ char lasttoken[TOKENLENGTH];        // At the end of postfix process, the last r
 int dumbvariableid = 0;
 char dumbvariablenum[N];
 char dumbvariablename[N];
-
 // to store the produced lines of expressions to be written in the output file:
 char cexpr[10*N];
 
@@ -93,13 +91,11 @@ bool istermscalar = false;
 bool isprevtermscalar = false;
 
 int main (int argc,char *argv[]) {
-
     strcat(executableBlock, "int main()\n{\n");
     char *q;
     char *token ;
     FILE *fp;
     FILE *wp;
-
     char buff[256];
     const char* line;
     /* Open file for reading Filename is given on the command line */
@@ -108,7 +104,6 @@ int main (int argc,char *argv[]) {
         return(1);
     }
     fp = fopen(argv[1], "r");
-    wp = fopen(argv[2], "w");
 
     if(fp == NULL) {
         printf("Cannot open %s\n",argv[1]);
@@ -168,12 +163,13 @@ int main (int argc,char *argv[]) {
     addFunctionDeclarations();
     addFunctionDefinitions();
 
+    wp = fopen(argv[2], "w");
     fprintf(wp, "%s", funcDeclarationBlock);
     fprintf(wp, "%s", definitionBlock);
     fprintf(wp, "%s", executableBlock);
     fprintf(wp, "%s", funcDefinitionBlock);
-
     fclose(wp);
+    fclose(fp);
     return(0);
 }
 
@@ -1999,4 +1995,3 @@ void addFunctionDeclarations(){
     strcat(funcDeclarationBlock, "int row = 0, column = 0, middle = 0;\n");
     strcat(funcDeclarationBlock, "float *ptr;\n\n");
 }
-
