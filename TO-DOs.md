@@ -1,7 +1,7 @@
 
 //// TO-DOs:
 
-- IDs list hes compilationda sıfırlanmalı
+- IDs list hes compilationda sıfırlıyor muyuz? Sıfırlayabiliriz, memset vs
 - "Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.
 - documentation + comment
 - Hocadan caldığımız kodu bir tık özelleştirebiliriz
