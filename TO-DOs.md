@@ -17,7 +17,9 @@
 
 FOR TEST CASES: 
 
-```vector y[2]
+```
+//valid
+vector y[2]
 y = {1 2}
 y[1] = 3
 ```
