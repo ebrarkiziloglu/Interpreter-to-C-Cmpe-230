@@ -4,7 +4,7 @@ scalar x
 scalar y
 scalar z
 
-A = {1,2,3,4,5,6}
+A = {1 2 3 4 5 6}
 x=20
 y=10
 z = A[2,2]*x + tr(y) - 100
