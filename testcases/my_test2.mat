@@ -1,0 +1,21 @@
+# checks 2d for loop and loop variables
+matrix A[3,2]
+scalar x
+scalar y
+scalar z
+
+A = {1,2,3,4,5,6}
+x=20
+y=10
+z = A[2,2]*x + tr(y) - 100
+
+for(i, j in sqrt(4):tr(x):choose(A[1,2], x, A[2,1], 3), tr(1):sqrt(choose(x, tr(x), y, z){
+  print(i)
+  print(j)
+}
+
+for(i, j in 1:3:1, 1:2:1){
+  A[i,j] = A[i,j]*2
+}
+
+print(A)
