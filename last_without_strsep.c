@@ -99,7 +99,7 @@ int main (int argc,char *argv[]) {
     char buff[256];
     const char* line;
     /* Open file for reading Filename is given on the command line */
-    if (argc != 3) {
+    if (argc != 2) {
         printf("Give filename as command line argument\n") ;
         return(1);
     }
@@ -163,7 +163,11 @@ int main (int argc,char *argv[]) {
     addFunctionDeclarations();
     addFunctionDefinitions();
 
-    wp = fopen(argv[2], "w");
+    char outputPath[strlen(argv[1])];
+    char *position = strstr(argv[1], ".mat");
+    strncpy(outputPath, argv[1], position - argv[1]);
+    strcat(outputPath, ".c");
+    wp = fopen(outputPath, "w");
     fprintf(wp, "%s", funcDeclarationBlock);
     fprintf(wp, "%s", definitionBlock);
     fprintf(wp, "%s", executableBlock);
