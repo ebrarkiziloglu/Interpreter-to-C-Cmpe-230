@@ -1,4 +1,4 @@
-#this test case checks scalar[i], changing the value of a member in vector and printing matrix row
+#this test case checks the changing the value of a member in vector and printing matrix row
 
 vector y[2]
 scalar x
@@ -17,6 +17,3 @@ print(c)
 print(c[1])
 
 print(y[1])
-print(x[1])
-
-
