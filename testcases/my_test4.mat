@@ -1,0 +1,6 @@
+# checks for redeclaration
+
+scalar  x
+vector x[2]
+
+x=3
