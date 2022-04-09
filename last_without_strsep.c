@@ -51,7 +51,7 @@ char index1[TOKENLENGTH] = "";
 char index2[TOKENLENGTH] = "";
 int numofindexes;
 char lasttoken[TOKENLENGTH];        // At the end of postfix process, the last result token is stored here.
-                                    // Afterwards, this is assigned to the LEFT-HAND-SIDE of the assignement line from the input file.
+// Afterwards, this is assigned to the LEFT-HAND-SIDE of the assignement line from the input file.
 // to add some intermediate variables:
 int dumbvariableid = 0;
 char dumbvariablenum[N];
@@ -888,7 +888,6 @@ int processStack(char str[N], char *line, char *lasttoken){
                 currentindexofstack++;
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -9;
-
             }
             else if(strcmp(stacktokens[stackcur], "scalarmatrix") == 0){
                 if(currentindexofstack < 2) return 0;
@@ -937,6 +936,9 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcat(line, " , row, column, ");
                 strcat(line, IDs[idofdumbvar].name);
                 strcat(line, " );");
+                currentindexofstack++;
+                strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
+                typeoftokensinstack[currentindexofstack] = -9;
 
             }
             else if(strcmp(stacktokens[stackcur], "matrixscalar") == 0){
@@ -986,6 +988,9 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcat(line, " , row, column, ");
                 strcat(line, IDs[idofdumbvar].name);
                 strcat(line, " );");
+                currentindexofstack++;
+                strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
+                typeoftokensinstack[currentindexofstack] = -9;
             }
         }
         else if(strcmp(stacktokens[stackcur] , "+") == 0){
@@ -1747,7 +1752,7 @@ int isNumber(char s[]){
 
 int isID(char *s){
 
-    for(int i=0; i<MAXIDS; i++){
+    for(int i=0; i<currentID; i++){
         if(strcmp(s, IDs[i].name)==0)
             return i;
     }
@@ -1818,6 +1823,25 @@ int isValidVarName(char* name){
             return 0;
         }
     }
+    if(strcmp(name, "scalar")==0)
+        return 0;
+    if(strcmp(name, "vector")==0)
+        return 0;
+    if(strcmp(name, "matrix")==0)
+        return 0;
+    if(strcmp(name, "tr")==0)
+        return 0;
+    if(strcmp(name, "sqrt")==0)
+        return 0;
+    if(strcmp(name, "choose")==0)
+        return 0;
+    if(strcmp(name, "for")==0)
+        return 0;
+    if(strcmp(name, "print")==0)
+        return 0;
+    if(strcmp(name, "printsep")==0)
+        return 0;
+
     return 1;
 }
 
