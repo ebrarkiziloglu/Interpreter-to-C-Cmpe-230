@@ -2,15 +2,15 @@
 //// TO-DOs:
 
 - IDs list hes compilationda sıfırlıyor muyuz? Sıfırlayabiliriz, memset vs
-- "Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.
+- ~~"Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.~~
 - documentation + comment
 - Hocadan caldığımız kodu bir tık özelleştirebiliriz
-- ERROR lineımızda syntax farklılığı var - piazza son soruya verilen cevap!!
-- print, printsep, matrix etc are not valid id names
-- isID fonksiyonunun içindeki for u MAXID ye kadar götürmek yerine currentidye kadar götürmek
+- ~~ERROR lineımızda syntax farklılığı var - piazza son soruya verilen cevap!!~~
+- ~~print, printsep, matrix etc are not valid id names~~
+- ~~isID fonksiyonunun içindeki for u MAXID ye kadar götürmek yerine currentidye kadar götürmek~~
 - valgrind
 - Just use the floor function  to convert float to int
-- printsep length -- take it as 12
+- ~~printsep length -- take it as 12~~
 - https://piazza.com/class/kzpxjob9qs01nt?cid=59
 
 
