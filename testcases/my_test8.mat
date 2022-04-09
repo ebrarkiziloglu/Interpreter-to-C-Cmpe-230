@@ -1,0 +1,7 @@
+#var names cannot be reserved names
+
+scalar scalar
+vector matrix[2]
+
+scalar = 5
+matrix = {1, 2}
