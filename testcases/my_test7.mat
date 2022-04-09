@@ -1,0 +1,6 @@
+# scalar[i] invalid
+scalar s
+vector v
+
+print(s[1])
+print(v[1,1])
