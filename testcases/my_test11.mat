@@ -1,0 +1,13 @@
+matrix A[3,2]
+matrix B[2,3]
+matrix C[3,3]
+
+matrix D[3,3]
+matrix E[3,3]
+
+D = A*B*C
+print(D)
+
+E = E + E + D
+
+printd(E)
