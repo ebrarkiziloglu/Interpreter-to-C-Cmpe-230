@@ -2,6 +2,7 @@
 //// TO-DOs:
 
 - IDs list hes compilationda sıfırlıyor muyuz? Sıfırlayabiliriz, memset vs
+- C file path i için argüman verilmeyecek .mat pathini .c ye çevireceğiz
 - ~~"Should we detect and print an error message when a scalar variable is followed by square brackets? (Or when a vector is followed by a matrix like indexing)" YES dedi Hoca.~~
 - documentation + comment
 - Hocadan caldığımız kodu bir tık özelleştirebiliriz
