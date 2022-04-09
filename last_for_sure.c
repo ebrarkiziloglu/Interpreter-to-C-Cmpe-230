@@ -93,6 +93,7 @@ bool isprevtermscalar = false;
 
 int main (int argc,char *argv[]) {
     strcat(executableBlock, "int main()\n{\n");
+    memset(IDs, 0, sizeof(IDs));
     char *q;
     char *token ;
     FILE *fp;
@@ -111,13 +112,16 @@ int main (int argc,char *argv[]) {
         return(1);
     }
 
+    // Read line by line from .mat file
     while( fgets(buff,256,fp) != NULL ) {
+        // Following function call adds white spaces to the line read
         q = separateLine(buff, strlen(buff), false) ;
         lineNum++;
         numtokens = 0;
         memset(tokens, 0, sizeof(tokens[0][0]) * strlen(tokens[0]) * TOKENLENGTH);
         cexpr[0] = '\0';
         cur = 0;
+        // Line is separated into tokens and tokens are added to tokens array one-by-one
         while( (token = strsep(&q," ")) != NULL ){
             while( (strcmp(token, " ") == 0) || (strcmp(token, "") == 0) || (strcmp(token, "\n") == 0)) {
                 token = strsep(&q," ");
@@ -125,6 +129,7 @@ int main (int argc,char *argv[]) {
                     break;
             }
             if(token != NULL){
+                // If # token is seen, stops reading the rest of the line
                 if((strcmp(token, "#") == 0)){
                     break;
                 }
@@ -134,21 +139,28 @@ int main (int argc,char *argv[]) {
             else break;
         }
 
+        // If there is any token in the line:
         if(numtokens != 0){
             sprintf(tokens[numtokens],"$") ;
             numtokens++ ;
             char str[N] = "";
+            // Following call processes the line given, according to its type:
             int typeOfLine = process(str, numtokens, cexpr);
             if( typeOfLine ==0){
+                // If the value is 0, there has to be error in .mat file
                 printf("ERROR LINE %d\n", lineNum);
                 return 0;
             }
             else if( typeOfLine == 1){
+                // If the value is 1, the line is an executable statement
+                // The line is added to executableBlock string
                 strcat(executableBlock, "\t");
                 strcat(executableBlock, cexpr);
                 strcat(executableBlock, "\n");
             }
             else if( typeOfLine == 2){
+                // If the value is 1, the line is an definition statement
+                // The line is added to definitionBlock string
                 strcat(definitionBlock, cexpr);
                 strcat(definitionBlock, "\n");
             }
@@ -157,6 +169,8 @@ int main (int argc,char *argv[]) {
     }
 
     if(isInForLoop1==true || isInForLoop2==true){
+        // If a for loop is left open after all of the file is read: give error:
+        printf("ERROR LINE %d\n", lineNum);
         return 0;
     }
     strcat(definitionBlock, "\n");
@@ -164,20 +178,27 @@ int main (int argc,char *argv[]) {
     addFunctionDeclarations();
     addFunctionDefinitions();
 
+    // Output .c file's path is created by the input .mat file's path:
     char outputPath[strlen(argv[1])];
     char *position = strstr(argv[1], ".mat");
     strncpy(outputPath, argv[1], position - argv[1]);
     strcat(outputPath, ".c");
+    // Output .c file is created:
     wp = fopen(outputPath, "w");
+    // Respectively, headers and function definitions are written to .c file:
     fprintf(wp, "%s", funcDeclarationBlock);
+    // Definiton statements for global variables are written to .c file:
     fprintf(wp, "%s", definitionBlock);
+    // With main function, executable statements are written to .c file:
     fprintf(wp, "%s", executableBlock);
+    // Function bodies are written to .c file:
     fprintf(wp, "%s", funcDefinitionBlock);
     fclose(wp);
     fclose(fp);
     return(0);
 }
 
+// This function takes the string line and by adding the necessary white spaces, facilitates to divide string into tokens.
 char *separateLine(char line[], int length, bool nw){
     if(strcmp(line, "\n") == 0) return NULL;
     static char result[256] = "";
@@ -206,15 +227,17 @@ int process(char *str, int numTokens, char *res){
     str5[0] = '\0';
     str6[0] = '\0';
 
+    // checks whether the line is an assignment line:
     int assignment = isAssign();
 
     int exp1val, exp2val, exp3val, exp4val, exp5val, exp6val;
 
+    // checks whether the line is a variable definition line:
     if(strcmp(tokens[cur], "scalar")==0 || strcmp(tokens[cur], "vector")==0 || strcmp(tokens[cur], "matrix")==0){
         if( defineVariable(res) == 0 ) return 0;
         return 2;
     }
-    //print line
+    // checks whether the line is a print line:
     if(strcmp(tokens[cur], "print")==0){
         cur++;
         if(strcmp(tokens[cur], "(")!=0){
@@ -232,14 +255,15 @@ int process(char *str, int numTokens, char *res){
             return 0;
         }
         if(IDs[idCheck].type==7){
-            //scalar print
+            // scalar print
             strcat(res, "printScalar(");
             strcat(res, IDs[idCheck].name);
             strcat(res, ");");
 
         }else if(IDs[idCheck].type==8){
-            //vector
+            // vector type id:
             if(strcmp(tokens[cur],"[")==0){
+                // element of vector, scalar print:
                 cur++;
                 strcat(res, "printScalar(");
                 strcat(res, IDs[idCheck].name);
@@ -248,6 +272,7 @@ int process(char *str, int numTokens, char *res){
                 cur+=2;
                 strcat(res, "-1][0]);");
             }else{
+                // matrix print:
                 strcat(res, "printMatrix(");
                 sprintf(row, "%d", IDs[idCheck].row);
                 strcat(res, row);
@@ -258,7 +283,9 @@ int process(char *str, int numTokens, char *res){
                 strcat(res, ");");
             }
         }else{
+            // matrix print:
             if(strcmp(tokens[cur], "[")!=0) {
+                // matrix print:
                 strcat(res, "printMatrix(");
                 sprintf(row, "%d", IDs[idCheck].row);
                 strcat(res, row);
@@ -269,6 +296,7 @@ int process(char *str, int numTokens, char *res){
                 strcat(res, IDs[idCheck].name);
                 strcat(res, ");");
             }else if(strcmp(tokens[cur], "[")==0 && strcmp(tokens[cur+2], ",")==0){
+                // element of matrix, scalar print:
                 cur++;
                 strcat(res, "printScalar(");
                 strcat(res, IDs[idCheck].name);
@@ -280,6 +308,7 @@ int process(char *str, int numTokens, char *res){
                 cur+=2;
                 strcat(res, "-1]);");
             }else{
+                // matrix print:
                 strcat(res, "printMatrix(");
                 strcat(res, "1");
                 strcat(res, ", ");
@@ -302,22 +331,20 @@ int process(char *str, int numTokens, char *res){
         return 1;
     }
 
-        //printsep statement:
+    // printsep statement:
     else if(strcmp(tokens[cur], "printsep")==0){
         cur++;
-        if(strcmp(tokens[cur],"(")!=0){
+        if(strcmp(tokens[cur],"(")!=0)
             return 0;
-        }
         cur++;
-        if(strcmp(tokens[cur],")")!=0){
+        if(strcmp(tokens[cur],")")!=0)
             return 0;
-        }
         cur++;
         strcat(res, "printSep();\n");
         return 1;
     }
 
-        // for statement:
+    // for statement:
     else if(strcmp(tokens[cur], "for")==0){
         cur++;
         if(strcmp(tokens[cur],"(")!=0){
@@ -346,7 +373,7 @@ int process(char *str, int numTokens, char *res){
         }
         cur++;
 
-        //nested for statement:
+        // nested for statement:
         if(strcmp(tokens[cur],",")==0){
             cur++;
             checkId = isID(tokens[cur]);
@@ -457,8 +484,7 @@ int process(char *str, int numTokens, char *res){
             strcat(res, "){\n\t\t");
             return 1;
         }
-
-            // 1d for statement:
+        // 1d for statement:
         else if(strcmp(tokens[cur],"in")==0){
 
             cur++;
@@ -471,19 +497,16 @@ int process(char *str, int numTokens, char *res){
             if (exp1val != 2) {
                 return 0;
             }
-
             cur = colonIndex + 1;
             colonIndex = findColon();
             if (colonIndex == -1) {
                 return 0;
             }
             sprintf(tokens[colonIndex], "$");
-
             exp2val = expr(str2);
             if (exp2val != 2) {
                 return 0;
             }
-
             cur = colonIndex + 1;
             exp3val = expr(str3);
             if (exp3val != 2) {
@@ -514,6 +537,7 @@ int process(char *str, int numTokens, char *res){
         }
     }
 
+    // end of for loop:
     else if(strcmp(tokens[cur], "}")==0){
         cur++;
         if(isInForLoop2==true && isInForLoop1==true){
@@ -530,14 +554,13 @@ int process(char *str, int numTokens, char *res){
         return 0;
     }
 
-        // assignment line
+    // assignment line
     else if(assignment!=-1){
+        // Calls assign function to process assignment
         return assign(numTokens, res, assignment);
     }
-
-    else{
+    else
         return 0;
-    }
 }
 
 // this function reads the variable definitions and converts them to C language.
@@ -571,7 +594,6 @@ int defineVariable(char *str){
         cur++;
         if(is_integer(row) != 0){
             strcat(str, row); ////this is row
-
             if(maxDimension < atoi(row)) maxDimension = atoi(row);
         } else{
             return 0;
@@ -623,7 +645,6 @@ int defineVariable(char *str){
         }
     }
     strcat(str, ";");
-
     if(isID(name)!=-1){
         // if id already exists, then error
         return 0;
@@ -648,6 +669,7 @@ int defineVariable(char *str){
     }
 }
 
+//
 int assign(int numTokens, char* res, int equalIndex){
 
     char str1[N], str2[N], processStr[N], processStr2[N], editVar[N];
@@ -692,7 +714,6 @@ int assign(int numTokens, char* res, int equalIndex){
     }
     else if(factorvalue == 3){
         int IDno = isID(tokens[0]);
-
         //if token is {
         if(strcmp(tokens[cur],"{")==0){
             char row[N], column[N];
@@ -787,6 +808,7 @@ int assign(int numTokens, char* res, int equalIndex){
     return 1;
 }
 
+// This function takes the postfix string from expr() function and process it. Adds the necessary C code to char pointer line:
 int processStack(char str[N], char *line, char *lasttoken){
     memset(stack, 0, sizeof(stack));
     memset(typeoftokensinstack, 0, sizeof(typeoftokensinstack));
@@ -801,9 +823,11 @@ int processStack(char str[N], char *line, char *lasttoken){
     stackcur = 0;
     char *p;
     char *stacktoken;
-    p = separateLine(str, strlen(str), false);
     numstacktokens = 0;
     memset(stacktokens, 0, sizeof(stacktokens[0][0]) * strlen(stacktokens[0]) * TOKENLENGTH);
+
+    // Postfix string is divided into tokens and added to stacktokens array:
+    p = separateLine(str, strlen(str), false);
     while( (stacktoken = strsep(&p," ")) != NULL ){
         while( (strcmp(stacktoken, " ") == 0) || (strcmp(stacktoken, "") == 0) || (strcmp(stacktoken, "\n") == 0)) {
             stacktoken = strsep(&p," ");
@@ -816,11 +840,16 @@ int processStack(char str[N], char *line, char *lasttoken){
         }
         else break;
     }
-
     strcat(line, "\t");
+
+    // Until all of the tokens in the stacktokens are processed, the following while loop runs:
     while(stackcur < numstacktokens){
+        // If the current token is '*':
         if(strcmp(stacktokens[stackcur] , "*") == 0){
             stackcur++;
+            // In all of the cases, 2 tokens will be needed. They will be taken from stack array
+            // If there is not enough token, or the tokens' types do not match with the expected type, 0 is returned immediately.
+            // If the operator is scalar multiplication:
             if(strcmp(stacktokens[stackcur], "scalar") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -833,6 +862,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 typeoftokensinstack[currentindexofstack] = 0;
                 strcat(stack[currentindexofstack], "");
                 currentindexofstack--;
+                // The result of the operation will be stored in the following dumb variable:
                 int idofdumbvar = adddumbVar(-7);
                 strcat(line, "\n\tfloat ");
                 strcat(line, IDs[idofdumbvar].name);
@@ -845,6 +875,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -7;
             }
+            // If the operator is matrix multiplication:
             else if(strcmp(stacktokens[stackcur], "matrix") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -860,8 +891,8 @@ int processStack(char str[N], char *line, char *lasttoken){
                 int token1id = isID(token1);
                 int token2id = isID(token2);
                 if(IDs[token1id].col != IDs[token2id].row) return 0;
-
                 int idofdumbvarptr = adddumbVar(-10);
+                // The result of the operation will be stored in the following dumb variable:
                 int idofdumbvar = adddumbVar(-9);
                 strcat(line, "\n\trow = sizeof(");
                 strcat(line, token1);
@@ -894,6 +925,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -9;
             }
+            // If the operator is scalar*matrix multiplication:
             else if(strcmp(stacktokens[stackcur], "scalarmatrix") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -909,9 +941,10 @@ int processStack(char str[N], char *line, char *lasttoken){
                 // token1: scalar, token2: matrix
                 int matrixID = isID(token2);
                 if(matrixID == -1) return 0;
-
                 int idofdumbvarptr = adddumbVar(-10);
+                // The result of the operation will be stored in the following dumb variable:
                 int idofdumbvar = adddumbVar(-9);
+                // Following lines are added to char pointer line:
                 // row = sizeof(x)/sizeof(x[0]);
                 // column = sizeof(x[0])/sizeof(x[0][0]);
                 // float *y2[row];
@@ -946,6 +979,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 typeoftokensinstack[currentindexofstack] = -9;
 
             }
+            // If the operator is matrix*scalar multiplication:
             else if(strcmp(stacktokens[stackcur], "matrixscalar") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -962,7 +996,9 @@ int processStack(char str[N], char *line, char *lasttoken){
                 int matrixID = isID(token1);
                 if(matrixID == -1) return 0;
                 int idofdumbvarptr = adddumbVar(-10);
+                // The result of the operation will be stored in the following dumb variable:
                 int idofdumbvar = adddumbVar(-9);
+                // Following lines are added to char pointer line:
                 // row = sizeof(x)/sizeof(x[0]);
                 // column = sizeof(x[0])/sizeof(x[0][0]);
                 // float *y2[row];
@@ -999,7 +1035,9 @@ int processStack(char str[N], char *line, char *lasttoken){
             }
         }
         else if(strcmp(stacktokens[stackcur] , "+") == 0){
+            // In all of the cases, 2 tokens will be needed. They will be taken from stack array
             stackcur++;
+            // If the operator is scalar addition:
             if(strcmp(stacktokens[stackcur], "scalar") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -1012,6 +1050,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 typeoftokensinstack[currentindexofstack] = 0;
                 strcat(stack[currentindexofstack], "");
                 currentindexofstack--;
+                // The result of the operation will be stored in the following dumb variable:
                 int idofdumbvar = adddumbVar(-7);
                 strcat(line, "\n\tfloat ");
                 strcat(line, IDs[idofdumbvar].name);
@@ -1024,6 +1063,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -7;
             }
+            // If the operator is matrix addition:
             else if(strcmp(stacktokens[stackcur], "matrix") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -1040,17 +1080,16 @@ int processStack(char str[N], char *line, char *lasttoken){
                 int token2id = isID(token2);
                 if(IDs[token1id].col != IDs[token2id].col) return 0;
                 if(IDs[token1id].row != IDs[token2id].row) return 0;
-
+                // Following lines are added to char pointer line:
                 // row = sizeof(y)/sizeof(y[0]);
                 // column = sizeof(y[0])/sizeof(y[0][0]);
                 // float *y2[row];
                 // float y3[row][column];
                 // addMatrix(row, column, y, x, y2);
                 // copyMatrix(y2, row, column, y3);
-
                 int idofdumbvarptr = adddumbVar(-10);
+                // The result of the operation will be stored in the following dumb variable:
                 int idofdumbvar = adddumbVar(-9);
-
                 strcat(line, "\n\trow = sizeof(");
                 strcat(line, token1);
                 strcat(line, ")/sizeof(");
@@ -1080,7 +1119,9 @@ int processStack(char str[N], char *line, char *lasttoken){
             }
         }
         else if(strcmp(stacktokens[stackcur] , "-") == 0){
+            // In all of the cases, 2 tokens will be needed. They will be taken from stack array
             stackcur++;
+            // If the operator is scalar subtraction:
             if(strcmp(stacktokens[stackcur], "scalar") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -1093,6 +1134,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 typeoftokensinstack[currentindexofstack] = 0;
                 strcat(stack[currentindexofstack], "");
                 currentindexofstack--;
+                // The result of the operation will be stored in the following dumb variable:
                 int idofdumbvar = adddumbVar(-7);
                 strcat(line, "\n\tfloat ");
                 strcat(line, IDs[idofdumbvar].name);
@@ -1105,6 +1147,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -7;
             }
+            // If the operator is matrix subtraction:
             else if(strcmp(stacktokens[stackcur], "matrix") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -1121,17 +1164,16 @@ int processStack(char str[N], char *line, char *lasttoken){
                 int token2id = isID(token2);
                 if(IDs[token1id].col != IDs[token2id].col) return 0;
                 if(IDs[token1id].row != IDs[token2id].row) return 0;
-
+                // Following lines are added to char pointer line:
                 // row = sizeof(y)/sizeof(y[0]);
                 // column = sizeof(y[0])/sizeof(y[0][0]);
                 // float *y2[row];
                 // float y3[row][column];
                 // subtractMatrix(row, column, y, x, y2);
                 // copyMatrix(y2, row, column, y3);
-
                 int idofdumbvarptr = adddumbVar(-10);
+                // The result of the operation will be stored in the following dumb variable:
                 int idofdumbvar = adddumbVar(-9);
-
                 strcat(line, "\n\trow = sizeof(");
                 strcat(line, token1);
                 strcat(line, ")/sizeof(");
@@ -1161,12 +1203,14 @@ int processStack(char str[N], char *line, char *lasttoken){
             }
         }
         else if(strcmp(stacktokens[stackcur], "sqrt") == 0){
+            // 1 token with scalar type is needed:
             if(currentindexofstack < 1) return 0;
             strcpy(token1, stack[currentindexofstack]);
             if((!is_integer(token1)) && (typeoftokensinstack[currentindexofstack] != 7) && (typeoftokensinstack[currentindexofstack] != -7)) return 0;
             typeoftokensinstack[currentindexofstack] = 0;
             strcat(stack[currentindexofstack], "");
             currentindexofstack--;
+            // Result will be stored in this dumb variable:
             int idofdumbvar = adddumbVar(-7);
             strcat(line, "\n\tfloat ");
             strcat(line, IDs[idofdumbvar].name);
@@ -1178,6 +1222,7 @@ int processStack(char str[N], char *line, char *lasttoken){
             typeoftokensinstack[currentindexofstack] = -7;
         }
         else if(strcmp(stacktokens[stackcur], "tr") == 0){
+            // 1 token is needed:
             if(currentindexofstack < 1) return 0;
             strcpy(token1, stack[currentindexofstack]);
             int typeoftoken1 = typeoftokensinstack[currentindexofstack];
@@ -1185,7 +1230,8 @@ int processStack(char str[N], char *line, char *lasttoken){
             strcat(stack[currentindexofstack], "");
             currentindexofstack--;
             if((is_integer(token1)) || (typeoftoken1 == 7 || typeoftoken1 == -7) ){
-                // scalar:
+                // type of token is scalar:
+                // Following line is added to char pointer line:
                 // float id = scalartr(token1);
                 int idofdumbvar = adddumbVar(-7);
                 strcat(line, "\n\tfloat ");
@@ -1198,7 +1244,8 @@ int processStack(char str[N], char *line, char *lasttoken){
                 typeoftokensinstack[currentindexofstack] = -7;
             }
             else if(typeoftoken1 == 9 || typeoftoken1 == -9){
-                // matrix:
+                // type of token is matrix:
+                // Following lines are added to char pointer line:
                 // row = sizeof(y3[0])/sizeof(y3[0][0]);
                 // column = sizeof(y3)/sizeof(y3[0]);
                 // float *y4[row];
@@ -1207,7 +1254,6 @@ int processStack(char str[N], char *line, char *lasttoken){
                 // copyMatrix(y4, row, column, y5);
                 int idofdumbvarptr = adddumbVar(-10);
                 int idofdumbvar = adddumbVar(-9);
-
                 strcat(line, "\n\trow = sizeof(");
                 strcat(line, token1);
                 strcat(line, "[0])/sizeof(");
@@ -1229,17 +1275,15 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcat(line, " , row, column, ");
                 strcat(line, IDs[idofdumbvar].name);
                 strcat(line, " );");
-
                 currentindexofstack++;
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -9;
-
             }
-            else{
+            else
                 return 0;
-            }
         }
         else if(strcmp(stacktokens[stackcur], "choose") == 0){
+            // 4 tokens with types scalar are needed. If this do not match, return 0.
             if(currentindexofstack < 4) return 0;
             strcpy(token4, stack[currentindexofstack]);
             if((!is_integer(token4)) && (typeoftokensinstack[currentindexofstack] != 7) && (typeoftokensinstack[currentindexofstack] != -7) ) return 0;
@@ -1261,10 +1305,9 @@ int processStack(char str[N], char *line, char *lasttoken){
             typeoftokensinstack[currentindexofstack] = 0;
             strcat(stack[currentindexofstack], "");
             currentindexofstack--;
-
             int idofdumbvar = adddumbVar(-7);
+            // Following line is added to char pointer line:
             // float dumb = choose (token1, token2, token3, token4);
-
             strcat(line, "\n\tfloat ");
             strcat(line, IDs[idofdumbvar].name);
             strcat(line, " = choose( ");
@@ -1282,6 +1325,7 @@ int processStack(char str[N], char *line, char *lasttoken){
 
         }
         else if(strcmp(stacktokens[stackcur], "[") == 0){
+            // Index is expected, it is already in index1 or index2:
             stackcur++;
             if(strcmp(stacktokens[stackcur], "]") != 0) return 0;
             if(typeoftokensinstack[currentindexofstack] != 7 && typeoftokensinstack[currentindexofstack] != -7) return 0;
@@ -1290,12 +1334,14 @@ int processStack(char str[N], char *line, char *lasttoken){
             strcat(stack[currentindexofstack], "");
             currentindexofstack--;
             if(numofindexes == 0){
+                // No index is waiting in line, add this new index to index1:
                 strcpy(index1, "[");
                 strcat(index1, token1);
                 strcat(index1, " -1]");
                 numofindexes++;
             }
             else if(numofindexes == 1){
+                // 1 index is already waiting in index1 variable, add this new index to index2:
                 strcpy(index2, "[");
                 strcat(index2, token1);
                 strcat(index2, " -1]");
@@ -1303,6 +1349,7 @@ int processStack(char str[N], char *line, char *lasttoken){
             }
         }
         else if( is_integer(stacktokens[stackcur])){
+            // Token is integer, just add id to stack array:
             currentindexofstack++;
             strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
             typeoftokensinstack[currentindexofstack] = 7;
@@ -1311,19 +1358,21 @@ int processStack(char str[N], char *line, char *lasttoken){
             int idcheck = isID(stacktokens[stackcur]);
             if(idcheck == -1) return 0;
             else if(IDs[idcheck].type== 7 || IDs[idcheck].type== -7){
-                // scalar
+                // Token is a scalar id, just add id to stack array:
                 currentindexofstack++;
                 strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
                 typeoftokensinstack[currentindexofstack] = 7;
             }
             else if(IDs[idcheck].type== 8 || IDs[idcheck].type== -8){
-                // vector
+                // Token is a vector id:
                 if(numofindexes == 0){
+                    // No index is waiting for an id, add vector id to stack:
                     currentindexofstack++;
                     strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
                     typeoftokensinstack[currentindexofstack] = 9;
                 }
                 else if(numofindexes == 1){
+                    // 1 index is waiting for an id, add vector with its index to stack, as scalar:
                     currentindexofstack++;
                     strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
                     strcat(stack[currentindexofstack] , index1);
@@ -1334,22 +1383,25 @@ int processStack(char str[N], char *line, char *lasttoken){
                 }
             }
             else if(IDs[idcheck].type== 9 || IDs[idcheck].type== -9){
-                // matrix:
+                // Token is a matrix id:
                 if(numofindexes == 0){
+                    // No index is waiting for an id, add matrix id to stack:
                     currentindexofstack++;
                     strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
                     typeoftokensinstack[currentindexofstack] = 9;
                 }
                 else if(numofindexes == 1){
-                    // vector
-                    currentindexofstack++;
-                    strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
-                    strcat(stack[currentindexofstack] , index1);
-                    typeoftokensinstack[currentindexofstack] = 8;
-                    strcpy(index1, "");
-                    numofindexes = 0;
+                    // Matrix id cannot be accessed by just one index, Error:
+//                    currentindexofstack++;
+//                    strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
+//                    strcat(stack[currentindexofstack] , index1);
+//                    typeoftokensinstack[currentindexofstack] = 8;
+//                    strcpy(index1, "");
+//                    numofindexes = 0;
+                    return 0;
                 }
                 else if(numofindexes == 2){
+                    // 2 indexes are waiting for an id, add matrix with its indexs to stack, as scalar:
                     currentindexofstack++;
                     strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
                     strcat(stack[currentindexofstack] , index1);
@@ -1360,17 +1412,17 @@ int processStack(char str[N], char *line, char *lasttoken){
                     numofindexes = 0;
                 }
             }
-            else {
-                return 0;}
+            else return 0;
         }
         stackcur++;
     }
-
+    // Add last token in the stack to lasttoken:
     strcpy(lasttoken, stack[currentindexofstack]);
     return 1;
 }
 
 int isAssign(){
+    // If the line includes the token "=", it should be an assigment line:
     for(int i=0; i<numtokens; i++){
         if(strcmp(tokens[i],"=")==0){
             return i;
@@ -1379,6 +1431,13 @@ int isAssign(){
     return -1;
 }
 
+// Following 5 functions (expr-term-moreterms-factor-morefactors) are used to read the infix expressions and convert them to postfix notation
+// The structure is generated with the help of a BNF grammar of the expressions
+// terms are added to or substracted by each other (together they become moreterms)
+// factors are multiplied by each other (together they become morefactors)
+// factor is the smallest element of this grammar
+// a factor can either be an integer, id of a variable (with or without indexes), sqrt-tr-choose function calls, or an expr in parenthesis
+// If any error is encountered, 0 is returned
 int expr(char *str)
 {
     char str1[N], str2[N] ;
@@ -1614,7 +1673,8 @@ int factor(char *str)
     if(check==-1){
         return 0;
 
-    }else if(IDs[check].type==7){
+    }
+    else if(IDs[check].type==7){
         //variable is a scalar
         strcat(str, tokens[cur]);
         strcat(str, " ");
@@ -1622,7 +1682,8 @@ int factor(char *str)
         isfactorscalar = true;
         return 2;
 
-    }else if(IDs[check].type==8){
+    }
+    else if(IDs[check].type==8){
         //variable is a vector
         strcpy(idname, tokens[cur]);
         cur++;
