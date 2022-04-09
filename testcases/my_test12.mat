@@ -1,0 +1,8 @@
+#invalid matrix multiplication
+
+matrix mat[3,4]
+matrix _n[3,5]
+
+matrix z[3,4]
+
+z = _n * mat
