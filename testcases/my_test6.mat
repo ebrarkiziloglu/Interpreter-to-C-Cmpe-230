@@ -1,0 +1,12 @@
+vector v[5]
+matrix m[4,5]
+
+#valid
+v[1] = 5
+m[1,2] = 3
+print(v[1])
+print(m[1,2])
+
+#invalid
+m[2] = v
+m[3] = tr(v)
