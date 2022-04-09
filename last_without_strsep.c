@@ -1391,12 +1391,6 @@ int processStack(char str[N], char *line, char *lasttoken){
                 }
                 else if(numofindexes == 1){
                     // Matrix id cannot be accessed by just one index, Error:
-//                    currentindexofstack++;
-//                    strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
-//                    strcat(stack[currentindexofstack] , index1);
-//                    typeoftokensinstack[currentindexofstack] = 8;
-//                    strcpy(index1, "");
-//                    numofindexes = 0;
                     return 0;
                 }
                 else if(numofindexes == 2){
