@@ -350,7 +350,9 @@ int process(char *str, int numTokens, char *res){
 
         // for statement:
     else if(strcmp(tokens[cur], "for")==0){
-        char forStr[N] = "";
+        char forStr1[N] = "";
+        char forStr2[N] = "";
+
         char processStr1[N], processStr2[N], processStr3[N], processStr4[N], processStr5[N], processStr6[N];
         processStr1[0] = '\0';
         processStr2[0] = '\0';
@@ -417,11 +419,11 @@ int process(char *str, int numTokens, char *res){
             }
             processStack(str1, processStr1, lasttoken);
             strcat(res, processStr1);
-            strcat(forStr, "for(int ");
-            strcat(forStr, forVarName1);
-            strcat(forStr, "=");
-            strcat(forStr, lasttoken);
-            strcat(forStr, "; ");
+            strcat(forStr1, "for(int ");
+            strcat(forStr1, forVarName1);
+            strcat(forStr1, "=");
+            strcat(forStr1, lasttoken);
+            strcat(forStr1, "; ");
 
             cur = colonIndex+1;
             colonIndex = findColon();
@@ -431,12 +433,12 @@ int process(char *str, int numTokens, char *res){
             }
             processStack(str2, processStr2, lasttoken);
             strcat(res, processStr2);
-            strcat(forStr, forVarName1);
-            strcat(forStr, "<=");
-            strcat(forStr, lasttoken);
-            strcat(forStr, "; ");
-            strcat(forStr, forVarName1);
-            strcat(forStr, " += ");
+            strcat(forStr1, forVarName1);
+            strcat(forStr1, "<=");
+            strcat(forStr1, lasttoken);
+            strcat(forStr1, "; ");
+            strcat(forStr1, forVarName1);
+            strcat(forStr1, " += ");
 
 
             cur = colonIndex+1;
@@ -451,8 +453,8 @@ int process(char *str, int numTokens, char *res){
             processStack(str3, processStr3, lasttoken);
 
             strcat(res, processStr3);
-            strcat(forStr, lasttoken);
-            strcat(forStr, "){\n\t\t");
+            strcat(forStr1, lasttoken);
+            strcat(forStr1, "){\n\t\t");
 
             cur = commaIndex+1;
             isInForLoop1 = true;
@@ -466,14 +468,13 @@ int process(char *str, int numTokens, char *res){
                 return 0;
             }
             processStack(str4, processStr4, lasttoken);
-            strcat(res, processStr4);
-            strcat(forStr, "for(int ");
-            strcat(forStr, forVarName2);
-            strcat(forStr, "=");
-            strcat(forStr, lasttoken);
-            strcat(forStr, "; ");
-            strcat(forStr, forVarName2);
-            strcat(forStr, "<=");
+            strcat(forStr2, "for(int ");
+            strcat(forStr2, forVarName2);
+            strcat(forStr2, "=");
+            strcat(forStr2, lasttoken);
+            strcat(forStr2, "; ");
+            strcat(forStr2, forVarName2);
+            strcat(forStr2, "<=");
 
             cur = colonIndex+1;
             colonIndex = findColon();
@@ -486,11 +487,10 @@ int process(char *str, int numTokens, char *res){
                 return 0;
             }
             processStack(str5, processStr5, lasttoken);
-            strcat(res, processStr5);
-            strcat(forStr, lasttoken);
-            strcat(forStr, "; ");
-            strcat(forStr, forVarName2);
-            strcat(forStr, " += ");
+            strcat(forStr2, lasttoken);
+            strcat(forStr2, "; ");
+            strcat(forStr2, forVarName2);
+            strcat(forStr2, " += ");
 
             cur = colonIndex+1;
 
@@ -499,16 +499,19 @@ int process(char *str, int numTokens, char *res){
                 return 0;
             }
             processStack(str6, processStr6, lasttoken);
-            strcat(res, processStr6);
-            strcat(forStr, lasttoken);
-            strcat(forStr, "){\n\t\t");
+            strcat(forStr2, lasttoken);
+            strcat(forStr2, "){\n\t\t");
 
             if (strcmp(tokens[cur], ")") != 0) {
                 return 0;
             }
             cur++;
             isInForLoop2 = true;
-            strcat(res, forStr);
+            strcat(res, forStr1);
+            strcat(res, processStr4);
+            strcat(res, processStr5);
+            strcat(res, processStr6);
+            strcat(res, forStr2);
             return 1;
         }
             // 1d for statement:
@@ -525,13 +528,13 @@ int process(char *str, int numTokens, char *res){
             }
             processStack(str1, processStr1, lasttoken);
             strcat(res, processStr1);
-            strcat(forStr, "for(int ");
-            strcat(forStr, forVarName1);
-            strcat(forStr, "=");
-            strcat(forStr, lasttoken);
-            strcat(forStr, "; ");
-            strcat(forStr, forVarName1);
-            strcat(forStr, "<=");
+            strcat(forStr1, "for(int ");
+            strcat(forStr1, forVarName1);
+            strcat(forStr1, "=");
+            strcat(forStr1, lasttoken);
+            strcat(forStr1, "; ");
+            strcat(forStr1, forVarName1);
+            strcat(forStr1, "<=");
 
             cur = colonIndex + 1;
             colonIndex = findColon();
@@ -544,10 +547,10 @@ int process(char *str, int numTokens, char *res){
             }
             processStack(str2, processStr2, lasttoken);
             strcat(res, processStr2);
-            strcat(forStr, lasttoken);
-            strcat(forStr, "; ");
-            strcat(forStr, forVarName1);
-            strcat(forStr, " += ");
+            strcat(forStr1, lasttoken);
+            strcat(forStr1, "; ");
+            strcat(forStr1, forVarName1);
+            strcat(forStr1, " += ");
 
             cur = colonIndex + 1;
             exp3val = expr(str3);
@@ -556,8 +559,8 @@ int process(char *str, int numTokens, char *res){
             }
             processStack(str3, processStr3, lasttoken);
             strcat(res, processStr3);
-            strcat(forStr, lasttoken);
-            strcat(forStr, "){\n\t");
+            strcat(forStr1, lasttoken);
+            strcat(forStr1, "){\n\t");
 
             if (strcmp(tokens[cur], ")") != 0) {
                 return 0;
@@ -565,7 +568,7 @@ int process(char *str, int numTokens, char *res){
             cur++;
             isInForLoop1 = true;
 
-            strcat(res, forStr);
+            strcat(res, forStr1);
             return 1;
         }
         else{
