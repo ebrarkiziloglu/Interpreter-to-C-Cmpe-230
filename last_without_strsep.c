@@ -181,6 +181,7 @@ int main (int argc,char *argv[]) {
     char outputPath[strlen(argv[1])];
     char *position = strstr(argv[1], ".mat");
     strncpy(outputPath, argv[1], position - argv[1]);
+    outputPath[position - argv[1]] = '\0';
     strcat(outputPath, ".c");
     // Output .c file is created:
     wp = fopen(outputPath, "w");
