@@ -148,7 +148,7 @@ int main (int argc,char *argv[]) {
             int typeOfLine = process(str, numtokens, cexpr);
             if( typeOfLine ==0){
                 // If the value is 0, there has to be error in .mat file
-                printf("ERROR LINE %d\n", lineNum);
+                printf("Error (Line %d)\n", lineNum);
                 return 0;
             }
             else if( typeOfLine == 1){
@@ -170,7 +170,7 @@ int main (int argc,char *argv[]) {
 
     if(isInForLoop1==true || isInForLoop2==true){
         // If a for loop is left open after all of the file is read: give error:
-        printf("ERROR LINE %d\n", lineNum);
+        printf("Error (Line %d)\n", lineNum);
         return 0;
     }
     strcat(definitionBlock, "\n");
