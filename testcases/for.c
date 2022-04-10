@@ -1,4 +1,5 @@
 else if(strcmp(tokens[cur], "for")==0){
+        char *forStr = "";
         char processStr1[N], processStr2[N], processStr3[N], processStr4[N], processStr5[N], processStr6[N];
         processStr1[0] = '\0';
         processStr2[0] = '\0';
@@ -64,6 +65,14 @@ else if(strcmp(tokens[cur], "for")==0){
             if(exp1val!=2){
                 return 0;
             }
+            processStack(str1, processStr1, lasttoken);
+            strcat(res, processStr1);
+            strcat(forStr, "for(int ");
+            strcat(forStr, forVarName1);
+            strcat(forStr, "=");
+            strcat(forStr, lasttoken);
+            strcat(forStr, "; ");
+            
             cur = colonIndex+1;
             colonIndex = findColon();
             sprintf(tokens[colonIndex],"$");
@@ -71,6 +80,16 @@ else if(strcmp(tokens[cur], "for")==0){
             if(exp2val!=2){
                 return 0;
             }
+            processStack(str2, processStr2, lasttoken);
+            strcat(res, processStr2);
+            strcat(forStr, forVarName1);
+            strcat(forStr, "<=");
+            strcat(forStr, lasttoken);
+            strcat(forStr, "; ");
+            strcat(forStr, forVarName1);
+            strcat(forStr, " += ");
+            
+            
             cur = colonIndex+1;
             commaIndex = findComma();
             if(commaIndex==-1){
@@ -81,26 +100,15 @@ else if(strcmp(tokens[cur], "for")==0){
             if(exp3val!=2){
                 return 0;
             }
+            processStack(str3, processStr3, lasttoken);
+
+            strcat(res, processStr3);
+            strcat(forStr, lasttoken);
+            strcat(forStr, "){\n\t\t");
+            
             cur = commaIndex+1;
             isInForLoop1 = true;
-            strcat(processStr1, str1);
-            strcat(processStr2, str2);
-            strcat(processStr3, str3);
-
-            strcat(res, "for(int ");
-            strcat(res, forVarName1);
-            strcat(res, "=");
-            strcat(res, processStr1);
-            strcat(res, "; ");
-            strcat(res, forVarName1);
-            strcat(res, "<=");
-            strcat(res, processStr2);
-            strcat(res, "; ");
-            strcat(res, forVarName1);
-            strcat(res, " += ");
-            strcat(res, processStr3);
-            strcat(res, "){\n\t\t");
-
+            
             colonIndex = findColon();
             if(colonIndex==-1){
                 return 0;
@@ -110,7 +118,16 @@ else if(strcmp(tokens[cur], "for")==0){
             if(exp4val!=2){
                 return 0;
             }
-
+            processStack(str4, processStr4, lasttoken);
+            strcat(res, processStr4);
+            strcat(forStr, "for(int ");
+            strcat(forStr, forVarName2);
+            strcat(forStr, "=");
+            strcat(forStr, lasttoken);
+            strcat(forStr, "; ");
+            strcat(forStr, forVarName2);
+            strcat(forStr, "<=");
+            
             cur = colonIndex+1;
             colonIndex = findColon();
             if(colonIndex==-1){
@@ -122,33 +139,30 @@ else if(strcmp(tokens[cur], "for")==0){
             if(exp5val!=2){
                 return 0;
             }
+            processStack(str5, processStr5, lasttoken);
+            strcat(res, processStr5);
+            strcat(forStr, lasttoken);
+            strcat(forStr, "; ");
+            strcat(forStr, forVarName2);
+            strcat(forStr, " += ");
+
             cur = colonIndex+1;
 
             exp6val = expr(str6);
             if(exp6val!=2){
                 return 0;
             }
+            processStack(str6, processStr6, lasttoken);
+            strcat(res, processStr6);
+            strcat(forStr, lasttoken);
+            strcat(forStr, "){\n\t\t");
+
             if (strcmp(tokens[cur], ")") != 0) {
                 return 0;
             }
             cur++;
             isInForLoop2 = true;
-            strcat(processStr4, str4);
-            strcat(processStr5, str5);
-            strcat(processStr6, str6);
-            strcat(res, "for(int ");
-            strcat(res, forVarName2);
-            strcat(res, "=");
-            strcat(res, processStr4);
-            strcat(res, "; ");
-            strcat(res, forVarName2);
-            strcat(res, "<=");
-            strcat(res, processStr5);
-            strcat(res, "; ");
-            strcat(res, forVarName2);
-            strcat(res, " += ");
-            strcat(res, processStr6);
-            strcat(res, "){\n\t\t");
+            strcat(res, forStr);
             return 1;
         }
             // 1d for statement:
@@ -164,6 +178,16 @@ else if(strcmp(tokens[cur], "for")==0){
             if (exp1val != 2) {
                 return 0;
             }
+            processStack(str1, processStr1, lasttoken);
+            strcat(res, processStr1);
+            strcat(forStr, "for(int ");
+            strcat(forStr, forVarName1);
+            strcat(forStr, "=");
+            strcat(forStr, lasttoken);
+            strcat(forStr, "; ");
+            strcat(forStr, forVarName1);
+            strcat(forStr, "<=");
+            
             cur = colonIndex + 1;
             colonIndex = findColon();
             if (colonIndex == -1) {
@@ -174,32 +198,30 @@ else if(strcmp(tokens[cur], "for")==0){
             if (exp2val != 2) {
                 return 0;
             }
+            processStack(str2, processStr2, lasttoken);
+            strcat(res, processStr2);
+            strcat(forStr, lasttoken);
+            strcat(forStr, "; ");
+            strcat(forStr, forVarName1);
+            strcat(forStr, " += ");
+            
             cur = colonIndex + 1;
             exp3val = expr(str3);
             if (exp3val != 2) {
                 return 0;
             }
+            processStack(str3, processStr3, lasttoken);
+            strcat(res, processStr3);
+            strcat(forStr, lasttoken);
+            strcat(forStr, "){\n\t");
+            
             if (strcmp(tokens[cur], ")") != 0) {
                 return 0;
             }
             cur++;
             isInForLoop1 = true;
-            strcat(processStr1, str1);
-            strcat(processStr2, str2);
-            strcat(processStr3, str3);
-            strcat(res, "for(int ");
-            strcat(res, forVarName1);
-            strcat(res, "=");
-            strcat(res, processStr1);
-            strcat(res, "; ");
-            strcat(res, forVarName1);
-            strcat(res, "<=");
-            strcat(res, processStr2);
-            strcat(res, "; ");
-            strcat(res, forVarName1);
-            strcat(res, " += ");
-            strcat(res, processStr3);
-            strcat(res, "){\n\t");
+
+            strcat(res, forStr);
             return 1;
         }
         else{
