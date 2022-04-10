@@ -48,8 +48,7 @@ char token1[TOKENLENGTH] = "";
 char token2[TOKENLENGTH] = "";
 char token3[TOKENLENGTH] = "";
 char token4[TOKENLENGTH] = "";
-char index1[TOKENLENGTH] = "";
-char index2[TOKENLENGTH] = "";
+char indexes[MAXTOKENS][TOKENLENGTH];
 int numofindexes;
 char lasttoken[TOKENLENGTH];        // At the end of postfix process, the last result token is stored here.
 // Afterwards, this is assigned to the LEFT-HAND-SIDE of the assignement line from the input file.
@@ -859,9 +858,8 @@ int assign(int numTokens, char* res, int equalIndex){
 int processStack(char str[N], char *line, char *lasttoken){
     memset(stack, 0, sizeof(stack));
     memset(typeoftokensinstack, 0, sizeof(typeoftokensinstack));
+    memset(indexes, 0, sizeof(indexes));
     currentindexofstack = 0;
-    strcpy(index1, "");
-    strcpy(index2, "");
     strcpy(token1, "");
     strcpy(token2, "");
     strcpy(token3, "");
@@ -1380,22 +1378,11 @@ int processStack(char str[N], char *line, char *lasttoken){
             typeoftokensinstack[currentindexofstack] = 0;
             strcat(stack[currentindexofstack], "");
             currentindexofstack--;
-            if(numofindexes == 0){
-                // No index is waiting in line, add this new index to index1:
-                strcpy(index1, "[");
-                strcat(index1, "(int)");
-                strcat(index1, token1);
-                strcat(index1, " -1]");
-                numofindexes++;
-            }
-            else if(numofindexes == 1){
-                // 1 index is already waiting in index1 variable, add this new index to index2:
-                strcpy(index2, "[");
-                strcat(index2, "(int)");
-                strcat(index2, token1);
-                strcat(index2, " -1]");
-                numofindexes++;
-            }
+            strcpy(indexes[numofindexes], "[");
+            strcat(indexes[numofindexes], "(int)");
+            strcat(indexes[numofindexes], token1);
+            strcat(indexes[numofindexes], "-1]");
+            numofindexes++;
         }
         else if( is_integer(stacktokens[stackcur])){
             // Token is integer, just add id to stack array:
@@ -1420,25 +1407,16 @@ int processStack(char str[N], char *line, char *lasttoken){
                     strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
                     typeoftokensinstack[currentindexofstack] = 9;
                 }
-                else if(numofindexes == 1){
-                    // 1 index is waiting for an id, add vector with its index to stack, as scalar:
+                else {
                     currentindexofstack++;
                     strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
-                    strcat(stack[currentindexofstack] , index1);
+                    strcat(stack[currentindexofstack] , indexes[numofindexes-1]);
                     strcat(stack[currentindexofstack] , "[0]");
                     typeoftokensinstack[currentindexofstack] = 7;
-                    strcpy(index1, "");
-                    numofindexes = 0;
-                } else if(numofindexes == 2){
-                    // 1 index is waiting for an id, add vector with its index to stack, as scalar:
-                    currentindexofstack++;
-                    strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
-                    strcat(stack[currentindexofstack] , index2);
-                    strcat(stack[currentindexofstack] , "[0]");
-                    typeoftokensinstack[currentindexofstack] = 7;
-                    strcpy(index2, "");
-                    numofindexes = 1;
+                    strcpy(indexes[numofindexes], "");
+                    numofindexes--;
                 }
+
             }
             else if(IDs[idcheck].type== 9 || IDs[idcheck].type== -9){
                 // Token is a matrix id:
@@ -1448,20 +1426,20 @@ int processStack(char str[N], char *line, char *lasttoken){
                     strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
                     typeoftokensinstack[currentindexofstack] = 9;
                 }
-                else if(numofindexes == 1){
-                    // Matrix id cannot be accessed by just one index, Error:
-                    return 0;
-                }
-                else if(numofindexes == 2){
-                    // 2 indexes are waiting for an id, add matrix with its indexs to stack, as scalar:
+                else {
+                    if(numofindexes < 2) return 0;
                     currentindexofstack++;
+                    char index[TOKENLENGTH * 3] = "";
+                    strcpy(index, indexes[numofindexes-2]);
+                    strcat(index, indexes[numofindexes-1]);
+                    strcpy(indexes[numofindexes], "");
+                    strcpy(indexes[numofindexes-1], "");
+                    numofindexes -= 2;
                     strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
-                    strcat(stack[currentindexofstack] , index1);
-                    strcat(stack[currentindexofstack] , index2);
+                    strcat(stack[currentindexofstack] , index);
+                    strcpy(index, "");
                     typeoftokensinstack[currentindexofstack] = 7;
-                    strcpy(index1, "");
-                    strcpy(index2, "");
-                    numofindexes = 0;
+
                 }
             }
             else return 0;
