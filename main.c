@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #define MAXTOKENS   100
-#define TOKENLENGTH 20
+#define TOKENLENGTH 30
 #define N  500
 #define MAXIDS 20
 
@@ -268,7 +268,7 @@ int process(char *str, int numTokens, char *res){
                 cur++;
                 strcat(res, "printScalar(");
                 strcat(res, IDs[idCheck].name);
-                strcat(res, "[");
+                strcat(res, "[(int)");
                 strcat(res, tokens[cur]);
                 cur+=2;
                 strcat(res, "-1][0]);");
@@ -301,10 +301,10 @@ int process(char *str, int numTokens, char *res){
                 cur++;
                 strcat(res, "printScalar(");
                 strcat(res, IDs[idCheck].name);
-                strcat(res, "[");
+                strcat(res, "[(int)");
                 strcat(res, tokens[cur]);
                 cur+=2;
-                strcat(res, "-1][");
+                strcat(res, "-1][(int)");
                 strcat(res, tokens[cur]);
                 cur+=2;
                 strcat(res, "-1]);");
@@ -408,7 +408,6 @@ int process(char *str, int numTokens, char *res){
             if(colonIndex==-1){
                 return 0;
             }
-            sprintf(tokens[colonIndex],"$");
             exp1val = expr(str1);
             if(exp1val!=2){
                 return 0;
@@ -423,7 +422,6 @@ int process(char *str, int numTokens, char *res){
 
             cur = colonIndex+1;
             colonIndex = findColon();
-            sprintf(tokens[colonIndex],"$");
             exp2val = expr(str2);
             if(exp2val!=2){
                 return 0;
@@ -443,7 +441,6 @@ int process(char *str, int numTokens, char *res){
             if(commaIndex==-1){
                 return 0;
             }
-            sprintf(tokens[commaIndex],"$");
             exp3val = expr(str3);
             if(exp3val!=2){
                 return 0;
@@ -461,7 +458,6 @@ int process(char *str, int numTokens, char *res){
             if(colonIndex==-1){
                 return 0;
             }
-            sprintf(tokens[colonIndex],"$");
             exp4val = expr(str4);
             if(exp4val!=2){
                 return 0;
@@ -481,7 +477,6 @@ int process(char *str, int numTokens, char *res){
             if(colonIndex==-1){
                 return 0;
             }
-            sprintf(tokens[colonIndex],"$");
 
             exp5val = expr(str5);
             if(exp5val!=2){
@@ -521,7 +516,6 @@ int process(char *str, int numTokens, char *res){
             if (colonIndex == -1) {
                 return 0;
             }
-            sprintf(tokens[colonIndex], "$");
             exp1val = expr(str1);
             if (exp1val != 2) {
                 return 0;
@@ -541,7 +535,6 @@ int process(char *str, int numTokens, char *res){
             if (colonIndex == -1) {
                 return 0;
             }
-            sprintf(tokens[colonIndex], "$");
             exp2val = expr(str2);
             if (exp2val != 2) {
                 return 0;
@@ -1102,7 +1095,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -7;
             }
-            // If the operator is matrix addition:
+                // If the operator is matrix addition:
             else if(strcmp(stacktokens[stackcur], "matrix") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -1186,7 +1179,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -7;
             }
-            // If the operator is matrix subtraction:
+                // If the operator is matrix subtraction:
             else if(strcmp(stacktokens[stackcur], "matrix") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -1376,6 +1369,7 @@ int processStack(char str[N], char *line, char *lasttoken){
             if(numofindexes == 0){
                 // No index is waiting in line, add this new index to index1:
                 strcpy(index1, "[");
+                strcat(index1, "(int)");
                 strcat(index1, token1);
                 strcat(index1, " -1]");
                 numofindexes++;
@@ -1383,6 +1377,7 @@ int processStack(char str[N], char *line, char *lasttoken){
             else if(numofindexes == 1){
                 // 1 index is already waiting in index1 variable, add this new index to index2:
                 strcpy(index2, "[");
+                strcat(index2, "(int)");
                 strcat(index2, token1);
                 strcat(index2, " -1]");
                 numofindexes++;
