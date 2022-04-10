@@ -1,0 +1,54 @@
+scalar a
+scalar b
+matrix A[3,3]
+matrix B[3,5]
+matrix C[5,7]
+matrix D[7,9]
+matrix E[3,9]
+vector u[3]
+vector v[3]
+vector t[3]
+vector s[7]
+vector s2[7]
+vector s3[7]
+s = {1 1 1 1 1 1 1}
+s2 ={2 1 0 0 1 0 2}
+s3 = s - s2
+u = {1 3 1}
+t = {0 0 3}
+v = v - t
+printsep()
+print(v)
+printsep()
+for (a,b in 1:3:1 , 1:3:1) {
+    A[a,b] = a + b * (t[1] + u[1])
+}
+printsep()
+print(A)
+printsep()
+for (a,b in 1:3:1 , 1:5:1){
+    B[a,b] = a - b * sqrt(t[1] + u[2])
+}
+printsep()
+print(B)
+printsep()
+for (a,b in 1:5:1 , 1:7:1){
+    C[a,b] = a * u[1] + u[2] * b + u[3]
+}
+printsep()
+print(C)
+printsep()
+for (a,b in 1:7:1 , 1:9:1){
+    D[a,b] = choose ( s3[((a))] , 1 , 2 , 3 )
+}
+printsep()
+print(D)
+printsep()
+E = A*B*C*D
+for (a in 1:5:2){
+    printsep()
+}
+print(E)
+for (a in 1:5:2){
+    printsep()
+}

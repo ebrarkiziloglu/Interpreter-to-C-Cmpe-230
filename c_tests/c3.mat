@@ -1,0 +1,5 @@
+scalar s
+print(s)
+printsep()
+s=1
+print(s)
