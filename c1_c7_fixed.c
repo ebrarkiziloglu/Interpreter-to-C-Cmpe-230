@@ -342,6 +342,8 @@ int process(char *str, int numTokens, char *res){
         if(strcmp(tokens[cur],")")!=0)
             return 0;
         cur++;
+        if(cur!=numTokens-1)
+            return 0;
         strcat(res, "printSep();\n");
         return 1;
     }
