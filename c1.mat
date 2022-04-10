@@ -1,0 +1,22 @@
+# find primes till 100 using sieve
+
+scalar a
+scalar i
+scalar j
+vector A[100]
+
+for (i in 1:100:1){
+    A[i] = 1
+}
+A[1] = 0
+
+for (i,j in 2:100:1 , i*i:100:i){
+    A[j] = 0
+}
+
+for (i in 1:100:1){
+    printsep()
+    print(A[i])
+    print(i)
+    printsep()
+}
