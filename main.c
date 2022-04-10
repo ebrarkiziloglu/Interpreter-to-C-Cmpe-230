@@ -1736,7 +1736,7 @@ int factor(char *str)
         }
         cur++;
         strcat(str, str1);
-        strcat(str, " [] ");
+        strcat(str, " [] 1 [] ");
         strcat(str, idname);
         strcat(str, " ");
         isfactorscalar = true;
