@@ -1,0 +1,30 @@
+matrix C[1,4]
+matrix B[4,4]
+matrix T[1,1]
+vector u[4]
+vector v[4]
+matrix A[4,1]
+matrix I4_4[4,4]
+matrix Q[4,4]
+u = {1 1 1 1}
+A = {1 1 1 1}
+I4_4 = {1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1}
+u = A
+A = u
+v = (A - u) * (1 + 1)
+printsep()
+print(v)
+printsep()
+v = (A + u) * (1 + 1)
+print(v)
+printsep()
+T = tr(v) * v
+Q = T[1,1] * I4_4
+print(Q)
+printsep()
+B = v * tr(v)
+print(B)
+printsep()
+
+
+printsep()

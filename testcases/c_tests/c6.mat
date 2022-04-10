@@ -1,0 +1,10 @@
+scalar i
+#her birini ayri ayri denemek isteyebilirsiniz
+print (i)
+print (i)(
+print )(i)
+print ((i))
+printsep ()(
+printsep ()()
+printsep )()
+printsep (())
