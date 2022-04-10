@@ -148,7 +148,7 @@ int main (int argc,char *argv[]) {
             int typeOfLine = process(str, numtokens, cexpr);
             if( typeOfLine ==0){
                 // If the value is 0, there has to be error in .mat file
-                printf("Error (Line %d)\n", lineNum);
+                printf("ERROR LINE %d\n", lineNum);
                 return 0;
             }
             else if( typeOfLine == 1){
@@ -170,7 +170,7 @@ int main (int argc,char *argv[]) {
 
     if(isInForLoop1==true || isInForLoop2==true){
         // If a for loop is left open after all of the file is read: give error:
-        printf("Error (Line %d)\n", lineNum);
+        printf("ERROR LINE %d\n", lineNum);
         return 0;
     }
     strcat(definitionBlock, "\n");
@@ -817,6 +817,7 @@ int assign(int numTokens, char* res, int equalIndex){
         strcat(res, " = ");
         strcat(res, lasttoken);
         strcat(res, ";\n");
+        strcpy(lasttoken, "");
     }
     else{
         // row = sizeof(x)/sizeof(x[0]);
@@ -839,6 +840,7 @@ int assign(int numTokens, char* res, int equalIndex){
         strcat(res, " , ");
         strcat(res, lasttoken);
         strcat(res, " );\n");
+        strcpy(lasttoken, "");
     }
     if(isInForLoop2) strcat(res, "\t\t");
     else if(isInForLoop1) strcat(res, "\t\t");
@@ -911,7 +913,7 @@ int processStack(char str[N], char *line, char *lasttoken){
                 strcpy(stack[currentindexofstack] , IDs[idofdumbvar].name);
                 typeoftokensinstack[currentindexofstack] = -7;
             }
-                // If the operator is matrix multiplication:
+            // If the operator is matrix multiplication:
             else if(strcmp(stacktokens[stackcur], "matrix") == 0){
                 if(currentindexofstack < 2) return 0;
                 strcpy(token2, stack[currentindexofstack]);
@@ -1736,7 +1738,7 @@ int factor(char *str)
         }
         cur++;
         strcat(str, str1);
-        strcat(str, " [] 1 [] ");
+        strcat(str, " [] ");
         strcat(str, idname);
         strcat(str, " ");
         isfactorscalar = true;
