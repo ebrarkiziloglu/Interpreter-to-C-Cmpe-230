@@ -601,7 +601,7 @@ int defineVariable(char *str){
     char *type;
     char *row = "0";
     char *column = "0";
-    char name[80];
+    char name[30];
     name[0] = '\0';
 
     strcpy(str, "float ");             // adding 'float ' at the beginning
@@ -822,6 +822,10 @@ int assign(int numTokens, char* res, int equalIndex){
         // row = sizeof(x)/sizeof(x[0]);
         // column = sizeof(x[0])/sizeof(x[0][0]);
         // copyMatrixtoMatrix( row, column, float a[r][c], float b[r][c]);
+        int lasttokenid = isID(lasttoken);
+        int varid = isID(editVar);
+        if(varid == -1 || lasttokenid == -1) return 0;
+        if((IDs[varid].row != IDs[lasttokenid].row) || (IDs[varid].col != IDs[lasttokenid].col)) return 0;
         strcat(res, "row = sizeof( ");
         strcat(res, lasttoken);
         strcat(res, ")/sizeof(");
