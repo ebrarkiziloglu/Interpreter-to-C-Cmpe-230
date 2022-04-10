@@ -1426,6 +1426,15 @@ int processStack(char str[N], char *line, char *lasttoken){
                     typeoftokensinstack[currentindexofstack] = 7;
                     strcpy(index1, "");
                     numofindexes = 0;
+                } else if(numofindexes == 2){
+                    // 1 index is waiting for an id, add vector with its index to stack, as scalar:
+                    currentindexofstack++;
+                    strcpy(stack[currentindexofstack] , stacktokens[stackcur] );
+                    strcat(stack[currentindexofstack] , index2);
+                    strcat(stack[currentindexofstack] , "[0]");
+                    typeoftokensinstack[currentindexofstack] = 7;
+                    strcpy(index2, "");
+                    numofindexes = 1;
                 }
             }
             else if(IDs[idcheck].type== 9 || IDs[idcheck].type== -9){
