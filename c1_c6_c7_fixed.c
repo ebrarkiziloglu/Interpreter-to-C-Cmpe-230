@@ -1549,7 +1549,7 @@ int moreterms(char *str){
             strcpy(str1, " ") ;
             strcat(str1, func);
             strcat(str1, "scalar ");
-        } else if(!isprevfactorscalar && !isfactorscalar){
+        } else if(!isprevtermscalar && !istermscalar){
             strcpy(str1, " ") ;
             strcat(str1, func);
             strcat(str1, "matrix ");
