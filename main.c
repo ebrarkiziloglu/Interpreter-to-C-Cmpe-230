@@ -601,7 +601,7 @@ int defineVariable(char *str){
     char *type;
     char *row = "0";
     char *column = "0";
-    char name[10];
+    char name[80];
     name[0] = '\0';
 
     strcpy(str, "float ");             // adding 'float ' at the beginning
