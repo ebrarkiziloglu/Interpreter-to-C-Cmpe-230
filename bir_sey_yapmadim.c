@@ -2090,6 +2090,7 @@ void addFunctionDefinitions(){
     strcat(funcDefinitionBlock, "int isInt(float x){\n"
                                 "    int n = (int)x;\n"
                                 "    double check = x-n;\n"
+                                "    if(x < 0) check = n-x;\n"
                                 "    if(check>0)\n"
                                 "        return 0;\n"
                                 "    return 1;\n"
